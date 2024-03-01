@@ -101,11 +101,13 @@ def split_dataset(
         dataset,
         # 학습 데이터 비율 (ex : 0.8)
         train_data_rate,
-        # 검증 데이터 비율 (ex : 0.2)
-        validation_data_rate
+        # 검증 데이터 비율 (ex : 0.1)
+        validation_data_rate,
+        # 테스트 데이터 비율 (ex : 0.1)
+        test_data_rate
 ):
     # rate 파라미터들의 합이 1인지 확인
-    total_rate = train_data_rate + validation_data_rate
+    total_rate = train_data_rate + validation_data_rate + test_data_rate
     assert total_rate == 1.0, f"Data split rates do not add up to 1.0 (current total: {total_rate})"
 
     # 전체 데이터 사이즈
@@ -115,13 +117,15 @@ def split_dataset(
     # 목적에 따라 데이터 분리
     train_size = int(dataset_size * train_data_rate)  # 학습 데이터
     validation_size = int(dataset_size * validation_data_rate)  # 검증 데이터
+    test_size = int(dataset_size * test_data_rate)  # 검증 데이터
 
     # 학습, 검증, 테스트 데이터를 무작위로 나누기
-    train_dataset, validation_dataset = random_split(dataset, [train_size, validation_size])
+    train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
     print(f"Training Data Size : {len(train_dataset)}")
     print(f"Validation Data Size : {len(validation_dataset)}")
+    print(f"Test Data Size : {len(test_dataset)}")
 
-    return train_dataset, validation_dataset
+    return train_dataset, validation_dataset, test_dataset
 
 
 def train_model(

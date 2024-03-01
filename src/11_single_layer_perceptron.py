@@ -23,10 +23,11 @@ def main():
     # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
     dataset = tu.ModelDataset(input_data=csv_data)
 
-    train_dataset, validation_dataset = tu.split_dataset(
+    train_dataset, validation_dataset, test_dataset = tu.split_dataset(
         dataset=dataset,
         train_data_rate=0.8,
-        validation_data_rate=0.2
+        validation_data_rate=0.1,
+        test_data_rate=0.1
     )
 
     train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True, drop_last=True)

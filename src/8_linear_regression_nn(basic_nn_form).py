@@ -2,7 +2,8 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader
 import utils.torch_util as tu
-import model_layers.non_linear_regression.main_model as non_linear_regression
+import model_layers.linear_regression.main_model as linear_regression
+import os
 
 
 def main():
@@ -10,11 +11,11 @@ def main():
     device = tu.get_gpu_support_device(gpu_support=True)
 
     # 모델 생성
-    model = non_linear_regression.MainModel()
+    model = linear_regression.MainModel()
 
     # CSV 에서 데이터 가져오기 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
     csv_data = tu.get_csv_file_data(
-        csv_file_full_url="../_datasets/non_linear.csv",
+        csv_file_full_url="../_datasets/linear.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
@@ -40,14 +41,17 @@ def main():
         num_epochs=10000,
         validation_dataloader=validation_dataloader,
         learning_rate=0.0001,
-        check_point_file_save_directory_path="../check_point_files",
+        check_point_file_save_directory_path="../check_point_files/linear_regression",
         # check_point_load_file_full_path="../check_points/checkpoint(2024_02_29_17_51_09_330).pt"
     )
 
     # 모델 저장
+    model_file_save_directory_path = "../model_files/linear_regression"
+    if not os.path.exists(model_file_save_directory_path):
+        os.makedirs(model_file_save_directory_path)
     save_file_full_path = tu.save_model_file(
         model=model,
-        model_file_save_directory_path="../model_files"
+        model_file_save_directory_path=model_file_save_directory_path
     )
 
     # # 저장된 모델 불러오기
@@ -55,12 +59,18 @@ def main():
     print("Model Load Complete!")
     print(model)
 
-    # 불러온 모델 테스트
-    tu.validate_model(
-        device=device,
-        model=model,
-        validation_dataloader=validation_dataloader
-    )
+    # 불러온 모델 순전파
+    with torch.no_grad():
+        model.eval()
+        inputs = torch.FloatTensor(
+            [
+                [1 ** 2, 1],
+                [5 ** 2, 5],
+                [11 ** 2, 11]
+            ]
+        ).to(device)
+        outputs = model(inputs)
+        print(outputs)
 
 
 if __name__ == '__main__':

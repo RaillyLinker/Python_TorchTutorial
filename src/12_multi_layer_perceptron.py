@@ -13,15 +13,12 @@ def main():
     # 모델 생성
     model = multi_layer_perceptron.MainModel()
 
-    # CSV 에서 데이터 가져오기 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
-    csv_data = tu.get_csv_file_data(
+    # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    dataset = tu.ModelDataset(
         csv_file_full_url="../_datasets/perceptron.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
-
-    # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
-    dataset = tu.ModelDataset(input_data=csv_data)
 
     train_dataset, validation_dataset, test_dataset = tu.split_dataset(
         dataset=dataset,

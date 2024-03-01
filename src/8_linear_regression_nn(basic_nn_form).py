@@ -13,15 +13,12 @@ def main():
     # 모델 생성
     model = linear_regression.MainModel()
 
-    # CSV 에서 데이터 가져오기 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
-    csv_data = tu.get_csv_file_data(
+    # 데이터셋 객체 생성 (ex : tensor([[-10., 100.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    dataset = tu.ModelDataset(
         csv_file_full_url="../_datasets/linear.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
-
-    # 데이터셋 객체 생성 (ex : tensor([[-10., 100.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
-    dataset = tu.ModelDataset(input_data=csv_data)
 
     train_dataset, validation_dataset, test_dataset = tu.split_dataset(
         dataset=dataset,
@@ -43,7 +40,7 @@ def main():
         validation_dataloader=validation_dataloader,
         learning_rate=0.0001,
         check_point_file_save_directory_path="../check_point_files/linear_regression",
-        # check_point_load_file_full_path="../check_points/checkpoint(2024_02_29_17_51_09_330).pt"
+        # check_point_load_file_full_path="../check_point_files/linear_regression/checkpoint(2024_02_29_17_51_09_330).pt"
     )
 
     # 모델 저장

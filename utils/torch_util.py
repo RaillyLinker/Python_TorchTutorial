@@ -76,20 +76,28 @@ def get_csv_file_data(
 class ModelDataset(Dataset):
     def __init__(
             self,
-            # [{x : [x1, ...], y : [y1, ...]}, {x : [x1, ...], y : [y1, ...]}, ...]
-            input_data
+            csv_file_full_url,
+            x_column_labels,
+            y_column_labels
     ):
+        # CSV 에서 데이터 가져오기 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
+        csv_data = get_csv_file_data(
+            csv_file_full_url=csv_file_full_url,
+            x_column_labels=x_column_labels,
+            y_column_labels=y_column_labels
+        )
+
         self.data = [
             {
-                "x": torch.FloatTensor(item["x"]),
-                "y": torch.FloatTensor(item["y"])
+                "x": item["x"],
+                "y": item["y"]
             }
-            for item in input_data
+            for item in csv_data
         ]
         self.length = len(self.data)
 
     def __getitem__(self, index):
-        return self.data[index]["x"], self.data[index]["y"]
+        return torch.FloatTensor(self.data[index]["x"]), torch.FloatTensor(self.data[index]["y"])
 
     def __len__(self):
         return self.length
@@ -179,7 +187,7 @@ def train_model(
             ty = ty.to(device)
 
             # 모델 순전파
-            model_out = model.forward(tx)
+            model_out = model(tx)
 
             # 모델 결과물 loss 계산
             loss = criterion(model_out, ty)
@@ -210,7 +218,7 @@ def train_model(
                     for vx, vy in validation_dataloader:
                         vx = vx.to(device)
                         vy = vy.to(device)
-                        model_out = model.forward(vx)
+                        model_out = model(vx)
 
                         loss = criterion(model_out, vy)
                         validation_loss += loss

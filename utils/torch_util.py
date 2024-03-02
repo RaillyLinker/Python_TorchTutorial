@@ -155,7 +155,11 @@ def train_model(
         # 가중치 감쇠 (L2 정칙화와 동일, ex : 0.001)
         weight_decay=None,
         # 모멘텀 값 (일반적으로 0.9 사용)
-        momentum=0.9
+        momentum=0.9,
+        # 그래디언트 클리핑 기울기 최대 값 (ex : 1)
+        # 그래디언트 최대값을 설정하여, 그래디언트 폭주를 막아 오버피팅을 억제합니다.
+        # RNN 등 기울기가 폭주될 가능성이 있는 모델에 적용 하세요.
+        grad_clip_max_norm=None
 ):
     # 학습 시작 시간 기록
     start_time = datetime.now()
@@ -203,6 +207,11 @@ def train_model(
             optimizer.zero_grad()
             # loss 에 따른 신경망 역전파 후 기울기 계산
             loss.backward()
+
+            # 그래디언트 클리핑
+            if grad_clip_max_norm is not None:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip_max_norm)
+
             # 신경망 학습
             optimizer.step()
 

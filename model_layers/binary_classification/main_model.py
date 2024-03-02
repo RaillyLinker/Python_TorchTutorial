@@ -16,6 +16,12 @@ class MainModel(nn.Module):
             nn.Sigmoid()
         )
 
+        self._init_weights()
+
+    def _init_weights(self):
+        nn.init.xavier_uniform_(self.layer[0].weight)
+        self.layer[0].bias.data.fill_(0.01)
+
     def forward(self, model_in):
         model_out = self.layer(model_in)
         return model_out

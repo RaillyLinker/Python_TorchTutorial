@@ -40,7 +40,9 @@ def main():
         validation_dataloader=validation_dataloader,
         learning_rate=0.0001,
         check_point_file_save_directory_path="../check_point_files/binary_classification",
-        # check_point_load_file_full_path="../check_points/checkpoint(2024_02_29_17_51_09_330).pt"
+        # check_point_load_file_full_path="../check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt",
+        weight_decay=0.001,
+        momentum=0.9
     )
 
     # 모델 저장

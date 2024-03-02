@@ -151,7 +151,11 @@ def train_model(
         # 체크포인트 파일 저장 폴더 경로 - None 이라면 저장하지 않음 (ex : "../check_points")
         check_point_file_save_directory_path=None,
         # 불러올 체크포인트 파일 경로 - None 이라면 불러 오지 않음 (ex : "../check_points/checkpoint(2024_02_29_17_51_09_330).pt")
-        check_point_load_file_full_path=None
+        check_point_load_file_full_path=None,
+        # 가중치 감쇠 (L2 정칙화와 동일, ex : 0.001)
+        weight_decay=None,
+        # 모멘텀 값 (일반적으로 0.9 사용)
+        momentum=0.9
 ):
     # 학습 시작 시간 기록
     start_time = datetime.now()
@@ -164,7 +168,10 @@ def train_model(
     criterion.to(device)
 
     # 옵티마이저
-    optimizer = optim.SGD(model.parameters(), lr=learning_rate)
+    if weight_decay is None:
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    else:
+        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
 
     # 모델에 학습 모드 설정 (Dropout, Batchnorm 등의 기능 활성화)
     model.train()

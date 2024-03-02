@@ -35,7 +35,7 @@ print("")
 print("텐서 자료형 설정 cuda")
 if torch.cuda.is_available():
     device = "cuda"
-    tensor = torch.cuda.FloatTensor([1, 2, 3])
+    tensor = torch.tensor(data=[1, 2, 3], dtype=torch.float32, device="cuda")
 else:
     device = "cpu"
     tensor = torch.FloatTensor([1, 2, 3])

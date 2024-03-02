@@ -19,6 +19,30 @@ from torch import nn
 요약하면, 배치 정규화는 보통 각 레이어의 선형 변환 이후 또는 활성화 함수 이전에 배치됩니다.
 """
 
+
+# BatchNorm 구현
+# 데이터의 평균을 0으로, 표준 편차를 1로 만듭니다. (데이터 분포를 표준 분포로 변경)
+class CustomBatchNorm1d(nn.Module):
+    def __init__(self, num_features):
+        super(CustomBatchNorm1d, self).__init__()
+        # 가중치 및 편향 파라미터 생성
+        self.gamma = nn.Parameter(torch.ones(num_features))  # scale parameter (학습 가능한 파라미터)
+        self.beta = nn.Parameter(torch.zeros(num_features))  # shift parameter (학습 가능한 파라미터)
+
+    def forward(self, model_in):
+        # 배치 평균과 배치 분산 계산
+        batch_mean = model_in.mean(dim=0)
+        batch_var = model_in.var(dim=0, unbiased=False)
+
+        # 배치 정규화 수행
+        normalized_x = (model_in - batch_mean) / torch.sqrt(batch_var + 1e-5)
+
+        # Scale 및 Shift 적용
+        scaled_x = normalized_x * self.gamma + self.beta
+        return scaled_x
+
+
+# 배치 정규화 실행
 x = torch.FloatTensor(
     [
         [-0.6577, -0.5797, 0.6360],
@@ -27,11 +51,13 @@ x = torch.FloatTensor(
     ]
 )
 
-# 배치 정규화 실행
-# 데이터의 평균을 0으로, 분산을 1로 만듭니다.
-# ((x - E(X)) / root(var(X) + e)) * r + b
-# 값에 평균을 빼고, 0 이 되는걸 방지하는 극소값을 더한 분산값에 루트를 씌워서 나누고 매개변수 r 과 b 를 계산해 줍니다.
-print(x[0].shape[0])
-norm_tensor = nn.BatchNorm1d(torch.Size([3])[0])(x)
+feature_size = x[0].shape[0]
+print(feature_size)
 
+# 커스텀 배치 정규화 실행
+norm_tensor = CustomBatchNorm1d(feature_size)(x)
+print(norm_tensor)
+
+# 제공 배치 정규화 실행
+norm_tensor = nn.BatchNorm1d(feature_size)(x)
 print(norm_tensor)

@@ -61,3 +61,21 @@ print(norm_tensor)
 # 제공 배치 정규화 실행
 norm_tensor = nn.BatchNorm1d(feature_size)(x)
 print(norm_tensor)
+
+
+# 적용 예시
+class Net(nn.Module):
+    def __init__(self):
+        super(Net, self).__init__()
+        self.fc1 = nn.Linear(28 * 28, 512)
+        self.bn1 = nn.BatchNorm1d(512)  # 선형 변환 이후, 활성화 이전 적용
+        self.relu1 = nn.ReLU()
+        self.fc2 = nn.Linear(512, 10)
+
+    def forward(self, model_in):
+        model_out = model_in.view(-1, 28 * 28)
+        model_out = self.fc1(model_out)
+        model_out = self.bn1(model_out)
+        model_out = self.relu1(model_out)
+        model_out = self.fc2(model_out)
+        return model_out

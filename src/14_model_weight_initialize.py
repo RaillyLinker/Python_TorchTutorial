@@ -15,6 +15,8 @@ class MainModel(nn.Module):
         )
         self.layer3 = nn.Linear(in_features=10, out_features=1)
 
+        self._init_weights()
+
     def _init_weights(self):
         # ReLU 를 활성화 함수로 사용하는 layer1 에는 Kaiming / He 초기화를 적용
         nn.init.kaiming_uniform_(self.layer1[0].weight, mode='fan_in', nonlinearity='relu')

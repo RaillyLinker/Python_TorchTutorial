@@ -10,9 +10,12 @@ def l1_regularization(train_dataloader, device, model, criterion):
 
         output = model(x)
 
+        # L1 Norm 적용 비율 (0.001 같은 작은 값을 사용하는 것이 일반적입니다.)
         _lambda = 0.5
-        l1_norm = sum(p.abs().sum() for p in model.parameters())  # 모델 파라미터에 abs 적용 후 더하기
+        # L1 Norm : 모델 파라미터에 abs 적용 후 더하기
+        l1_norm = sum(p.abs().sum() for p in model.parameters())
 
+        # L1 정규화를 적용하려면, l1_norm * _lambda 값을 손실값에 더해주면 됩니다.
         loss = criterion(output, y) + _lambda * l1_norm
 
 
@@ -28,9 +31,12 @@ def l2_regularization(train_dataloader, device, model, criterion):
 
         output = model(x)
 
+        # L2 Norm 적용 비율 (0.001 같은 작은 값을 사용하는 것이 일반적입니다.)
         _lambda = 0.5
-        l2_norm = sum(p.pow(2.0).sum() for p in model.parameters())  # 모델 파라미터를 제곱 후 더하기
+        # L2 Norm : 모델 파라미터를 제곱 후 더하기
+        l2_norm = sum(p.pow(2.0).sum() for p in model.parameters())
 
+        # L2 정규화를 적용하려면, l2_norm * _lambda 값을 손실값에 더해주면 됩니다.
         loss = criterion(output, y) + _lambda * l2_norm
 
 # 일반적으로 L2 정규화가 L1 정규화보다 더 많이 사용되며,

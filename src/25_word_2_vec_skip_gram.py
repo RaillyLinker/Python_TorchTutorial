@@ -54,9 +54,9 @@ corpus = Korpora.load("nsmc")
 # 학습 데이터 프레임 추리기
 corpus = pd.DataFrame(corpus.test)
 
-# 한국어 형태소로 분리
+# 말뭉치 데이터를 한국어 형태소로 분리
 tokenizer = Okt()
-tokens = [tokenizer.morphs(review) for review in corpus.text]
+corpus_token_matrix = [tokenizer.morphs(review) for review in corpus.text]
 
 # 형태소 분리된 문장 리스트 3개 출력 :
 # [
@@ -64,15 +64,15 @@ tokens = [tokenizer.morphs(review) for review in corpus.text]
 #   ['GDNTOPCLASSINTHECLUB'],
 #   ['뭐', '야', '이', '평점', '들', '은', '....', '나쁘진', '않지만', '10', '점', '짜', '리', '는', '더', '더욱', '아니잖아']
 # ]
-print(tokens[:3])
+print(corpus_token_matrix[:3])
 
 
 # 형태소 분리된 문장 리스트들의 리스트로 단어사전 생성 함수
-def build_vocab(corpus, n_vocab, special_token):
+def build_vocab(corpus_token_matrix, n_vocab, special_token):
     counter = Counter()
-    for tokens in corpus:
+    for corpus_token_list in corpus_token_matrix:
         # tokens ex : ['굳', 'ㅋ']
-        counter.update(tokens)
+        counter.update(corpus_token_list)
     # 사전에 없는 단어는 모두 special_token 으로 처리할 것
     vocab = [special_token]
     for token, count in counter.most_common(n_vocab):
@@ -80,14 +80,14 @@ def build_vocab(corpus, n_vocab, special_token):
     return vocab
 
 
-# tokens 으로 단어사전 생성
-vocab = build_vocab(corpus=tokens, n_vocab=5000, special_token="<unk>")
+# corpus_tokens 으로 단어사전 생성
+vocab = build_vocab(corpus_token_matrix=corpus_token_matrix, n_vocab=5000, special_token="<unk>")
 
 # 단어사전 인덱스를 기반으로 토큰을 인덱스로 변경하는 dict
-token_to_id = {token: idx for idx, token in enumerate(vocab)}
+vocab_token_to_id = {token: idx for idx, token in enumerate(vocab)}
 
 # 변경된 인덱스를 토큰으로 복구하는 dict
-id_to_token = {idx: token for idx, token in enumerate(vocab)}
+id_to_vocab_token = {idx: token for idx, token in enumerate(vocab)}
 
 # 단어 사전 내 단어 10개 출력 :
 # ['<unk>', '.', '이', '영화', '의', '..', '가', '에', '...', '을']
@@ -114,7 +114,7 @@ def get_word_pairs(tokens, window_size):
     return pairs
 
 
-word_pairs = get_word_pairs(tokens, window_size=2)
+word_pairs = get_word_pairs(corpus_token_matrix, window_size=2)
 # 출력 :
 # [
 #   ['굳', 'ㅋ'],
@@ -138,7 +138,7 @@ def get_index_pairs(word_pairs, token_to_id):
     return pairs
 
 
-index_pairs = get_index_pairs(word_pairs, token_to_id)
+index_pairs = get_index_pairs(word_pairs, vocab_token_to_id)
 # 인덱스 화 된 데이터 5 개 출력 :
 # [
 #   [595, 100],
@@ -173,7 +173,7 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 device = tu.get_gpu_support_device(gpu_support=True)
 
 # 기본 Word2Vec SkipGram 모델 생성
-word2vec = VanillaSkipgram(vocab_size=len(token_to_id), embedding_dim=128).to(device)
+word2vec = VanillaSkipgram(vocab_size=len(vocab_token_to_id), embedding_dim=128).to(device)
 criterion = nn.CrossEntropyLoss().to(device)
 optimizer = optim.SGD(word2vec.parameters(), lr=0.1)
 
@@ -252,4 +252,4 @@ top_n = top_n_index(cosine_matrix, n=5)
 
 print(f"{token}와 가장 유사한 5 개 단어")
 for index in top_n:
-    print(f"{id_to_token[index]} - 유사도 : {cosine_matrix[index]:.4f}")
+    print(f"{id_to_vocab_token[index]} - 유사도 : {cosine_matrix[index]:.4f}")

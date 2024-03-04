@@ -36,6 +36,3 @@ class MainModel(nn.Module):
         model_out = self.layer2(model_out)
         model_out = self.layer3(model_out)
         return model_out
-
-
-model = MainModel()

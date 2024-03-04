@@ -1,7 +1,11 @@
 import torch
 from torch import optim
 
-# 학습 독립 변수 데이터
+# [선형 회귀 모델 - 토치]
+# 아래 코드는 머신러닝의 기본적인 두가지 문제인 회귀 문제, 분류 문제 중 회귀 문제에 속하는 가장 단순한 선형 회귀 모델을
+# 토치 라이브러리의 지원을 받아 구현한 것입니다.
+
+# 학습용 독립 변수 데이터
 train_x = torch.FloatTensor(
     [
         [1], [2], [3], [4], [5], [6], [7], [8], [9], [10],
@@ -10,7 +14,7 @@ train_x = torch.FloatTensor(
     ]
 )
 
-# 학습 종속 변수 데이터
+# 학습용 종속 변수 데이터
 train_y = torch.FloatTensor(
     [
         [0.94], [1.98], [2.88], [3.92], [3.96], [4.55], [5.64], [6.3], [7.44], [9.1],
@@ -19,10 +23,8 @@ train_y = torch.FloatTensor(
     ]
 )
 
-# 모델 가중치
+# 선형 회귀 모델(y = (x * w) + b) 를 이루는 학습 가능한 파라미터(w, b)
 model_weight = torch.zeros(1, requires_grad=True)
-
-# 모델 편차
 model_bias = torch.zeros(1, requires_grad=True)
 
 # 옵티마이저
@@ -45,5 +47,8 @@ for epoch in range(10000):
     optimizer.step()
 
     if (epoch + 1) % 1000 == 0:
-        print(
-            f"Epoch : {epoch + 1:4d}, Weight : {model_weight.item():.3f}, Bias : {model_bias.item():.3f}, Cost : {model_loss:.3f}")
+        # 1000 에폭마다 로깅
+        print(f"Epoch : {epoch + 1:4d}, "
+              f"Weight : {model_weight.item():.3f}, "
+              f"Bias : {model_bias.item():.3f}, "
+              f"Cost : {model_loss:.3f}")

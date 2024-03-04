@@ -2,7 +2,14 @@ import torch
 from torch import nn
 from torch import optim
 
-# 학습 독립 변수 데이터
+# [선형 회귀 모델 - 토치 레이어]
+# 선형 회귀 모델은 딥러닝 모델의 가장 기본적인 형태이며,
+# 큰 모델에서는 이를 중첩하여 사용하게 될 것입니다.
+# 이 샘플은 토치에서 제공하는 가장 기본적인 선형 회귀 모델 레이어를 사용하는 방법을 보여줍니다.
+# 이전 샘플과 다른 점으론, 파라미터가 모델 레이어 객체 안에 포함되어 제공된다는 것이고,
+# 손실 함수도 토치 라이브러리에서 제공된 것을 사용하게 됩니다.
+
+# 학습용 독립 변수 데이터
 train_x = torch.FloatTensor(
     [
         [1], [2], [3], [4], [5], [6], [7], [8], [9], [10],
@@ -11,7 +18,7 @@ train_x = torch.FloatTensor(
     ]
 )
 
-# 학습 종속 변수 데이터
+# 학습용 종속 변수 데이터
 train_y = torch.FloatTensor(
     [
         [0.94], [1.98], [2.88], [3.92], [3.96], [4.55], [5.64], [6.3], [7.44], [9.1],
@@ -46,4 +53,6 @@ for epoch in range(10000):
     optimizer.step()
 
     if (epoch + 1) % 1000 == 0:
-        print(f"Epoch : {epoch + 1:4d}, Model : {list(model.parameters())}, Cost : {model_loss:.3f}")
+        print(f"Epoch : {epoch + 1:4d}, "
+              f"Model : {list(model.parameters())}, "
+              f"Cost : {model_loss:.3f}")

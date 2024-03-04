@@ -6,6 +6,13 @@ import model_layers.linear_regression.main_model as linear_regression
 import os
 
 
+# [선형 회귀 모델 - 토치 모델]
+# 아래 코드는 선형 회귀 모델을 본격적으로 토치 모델로 만들어 사용하는 예시를 보여줍니다.
+# 커스텀 뉴럴 네트워크 클래스를 작성하고,
+# 학습 데이터는 외부 데이터 파일에서 받아와 사용합니다.
+# 학습시에는 학습, 검증 및 테스트를 수행하며, 마지막으로 모델을 저장하거나 불러오는 등의 예시를 포함합니다.
+# 모델 생성, 학습, 검증의 정형화된 부분을 템플릿화 하였으므로 이를 참고하여 앞으로 모델을 작성하면 됩니다.
+
 def main():
     # 사용 가능 디바이스
     device = tu.get_gpu_support_device(gpu_support=True)
@@ -20,6 +27,7 @@ def main():
         y_column_labels=['y1']
     )
 
+    # 학습용, 검증용, 테스트용 데이터를 비율에 따라 분리
     train_dataset, validation_dataset, test_dataset = tu.split_dataset(
         dataset=dataset,
         train_data_rate=0.8,
@@ -27,6 +35,7 @@ def main():
         test_data_rate=0.1
     )
 
+    # 데이터 로더 래핑
     train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True, drop_last=True)
     validation_dataloader = DataLoader(validation_dataset, batch_size=10, shuffle=True, drop_last=True)
 

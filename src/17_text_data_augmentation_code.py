@@ -1,7 +1,9 @@
 import nlpaug.augmenter.word as naw
 import nlpaug.augmenter.char as nac
 
+# [텍스트 데이터 증강]
 # 텍스트 데이터를 증강시키는 여러 기법을 모아둡니다.
+
 # 데이터 변형으로 인한 증강 방식을 사용할 때,
 # 변형의 정도가 너무 작다면 동일 데이터를 사용한 것과 같이 오버피팅이 발생하며,
 # 변형의 정도가 너무 크다면 데이터 품질이 저하될 수 있습니다.

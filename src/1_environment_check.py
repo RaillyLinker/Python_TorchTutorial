@@ -8,7 +8,8 @@ print("")
 # CUDA 가속 확인
 print("CUDA 가속 확인")
 print(torch.cuda.is_available())
-print(torch.cuda.get_device_name())
+if torch.cuda.is_available() :
+    print(torch.cuda.get_device_name())
 print(torch.version.cuda)
 print("")
 

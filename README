@@ -1,5 +1,5 @@
-(현 가상 환경에 대한 conda_requirements.yaml 생성)
->> conda env export > conda_requirements.yaml
+>> pip list --format=freeze > mac_cpu_requirements.txt
+>> pip install -r mac_cpu_requirements.txt
 
-(conda_requirements.yaml 을 기반으로 가상 환경 생성)
->> conda env create -f conda_requirements.yaml -n myenv
+>> pip list --format=freeze > windows_gpu_requirements.txt
+>> pip install -r windows_gpu_requirements.txt

@@ -30,7 +30,6 @@ import utils.torch_util as tu
 # todo [Negative Sampling]
 
 # 기본 형식 Skip-gram 구현
-# todo 단어 사전 사이즈의 중심 단어의 One-Hot-Vector 를 입력 받아 동일 사이즈의 주변 단어의 One-Hot-Vector 를 반환 하는 모델 입니다.
 class VanillaSkipgram(nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super().__init__()
@@ -45,7 +44,7 @@ class VanillaSkipgram(nn.Module):
 
     def forward(self, input_ids):
         embeddings = self.embedding(input_ids)
-        output = self.linear(embeddings)
+        output = self.linear(embeddings)  # vocab_size 의 one-hot-vector 반환
         return output
 
 
@@ -158,9 +157,13 @@ index_pairs = torch.tensor(index_pairs)
 
 # 중심 단어 리스트 분리
 center_indexs = index_pairs[:, 0]
+# tensor([595, 100,  77,  77, 176])
+print(center_indexs[:5])
 
 # 주변 단어 리스트 분리
 contenxt_indexs = index_pairs[:, 1]
+# tensor([100, 595, 176,   2,  77])
+print(contenxt_indexs[:5])
 
 # 중심 단어와 주변 단어 리스트로 데이터셋 준비 후 데이터 로더로 래핑
 dataset = TensorDataset(center_indexs, contenxt_indexs)
@@ -174,16 +177,34 @@ word2vec = VanillaSkipgram(vocab_size=len(token_to_id), embedding_dim=128).to(de
 criterion = nn.CrossEntropyLoss().to(device)
 optimizer = optim.SGD(word2vec.parameters(), lr=0.1)
 
+io_print_flag = True
 for epoch in range(10):
     cost = 0.0
     for input_ids, target_ids in dataloader:
-        # todo input_ids 확인
         input_ids = input_ids.to(device)
         target_ids = target_ids.to(device)
 
         logits = word2vec(input_ids)
-        # todo logits 확인
         loss = criterion(logits, target_ids)
+
+        if io_print_flag:
+            io_print_flag = False
+            print("input")
+            # tensor([   0,  209,    0, 1289,  262])
+            print(input_ids[:5])
+
+            print("output")
+            # tensor([[ 0.2011,  1.0723, -0.3175,  ...,  0.6984,  0.1900,  0.4533],
+            #         [ 0.3880, -0.2664,  0.2827,  ..., -0.5723, -0.3123,  0.4300],
+            #         [ 0.2011,  1.0723, -0.3175,  ...,  0.6984,  0.1900,  0.4533],
+            #         [ 0.1834,  0.6913,  0.0013,  ..., -0.1637, -0.6249,  0.8163],
+            #         [-0.0508, -0.5118, -0.0853,  ..., -0.6565, -0.1343, -0.0602]],
+            #        grad_fn=<SliceBackward0>)
+            print(logits[:5])
+
+            print("label")
+            # tensor([105,  65,  19,  45, 966])
+            print(target_ids[:5])
 
         optimizer.zero_grad()
         loss.backward()

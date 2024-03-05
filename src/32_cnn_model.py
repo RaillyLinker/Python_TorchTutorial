@@ -4,6 +4,7 @@ from torch import nn
 """
 [합성곱 신경망 모델]
 아래는 합성곱 신경망 CNN 레이어를 사용하여 모델을 만드는 예시입니다.
+추가로, Pooling 의 경우에는 실제 데이터의 손실을 일으키기에 최근에는 Conv 계층의 간격을 조정하여 연산량을 줄이는 방법을 사용한다고 합니다.
 """
 
 
@@ -27,6 +28,7 @@ class CNN(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),
         )
 
+        # 매트릭스 데이터를 벡터 데이터로 변경하여 이미지 정보를 담은 벡터로 인코딩 하는 CNN 출력 레이어
         self.fc = nn.Linear(32 * 32 * 32, 10)
 
     def forward(self, x):

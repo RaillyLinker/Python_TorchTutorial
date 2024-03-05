@@ -13,11 +13,14 @@ gensim 라이브러리의 Word2Vec 은 계층적 소프트맥스나 네거티브
 corpus = Korpora.load("nsmc")
 
 # 학습 데이터 프레임 추리기
-corpus = pd.DataFrame(corpus.test)
+corpus_train = pd.DataFrame(corpus.train)
+corpus_test = pd.DataFrame(corpus.test)
 
 # 한국어 형태소로 분리
 tokenizer = Okt()
-tokens = [tokenizer.morphs(review) for review in corpus.text]
+tokens = [tokenizer.morphs(review) for review in corpus_train.text]
+for review in corpus_test.text:
+    tokens.append(tokenizer.morphs(review))
 
 # 형태소 분리된 문장 리스트 3개 출력 :
 # [

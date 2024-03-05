@@ -1,6 +1,5 @@
 import torch
 import pandas as pd
-from torch import optim
 from torch.utils.data import Dataset, random_split
 from datetime import datetime
 import os
@@ -73,7 +72,7 @@ def get_csv_file_data(
 
 
 # 모델 사용 데이터 셋
-class ModelDataset(Dataset):
+class CsvModelDataset(Dataset):
     def __init__(
             self,
             csv_file_full_url,
@@ -110,12 +109,10 @@ def split_dataset(
         # 학습 데이터 비율 (ex : 0.8)
         train_data_rate,
         # 검증 데이터 비율 (ex : 0.1)
-        validation_data_rate,
-        # 테스트 데이터 비율 (ex : 0.1)
-        test_data_rate
+        validation_data_rate
 ):
     # rate 파라미터들의 합이 1인지 확인
-    total_rate = train_data_rate + validation_data_rate + test_data_rate
+    total_rate = train_data_rate + validation_data_rate
     assert total_rate == 1.0, f"Data split rates do not add up to 1.0 (current total: {total_rate})"
 
     # 전체 데이터 사이즈
@@ -125,15 +122,13 @@ def split_dataset(
     # 목적에 따라 데이터 분리
     train_size = int(dataset_size * train_data_rate)  # 학습 데이터
     validation_size = int(dataset_size * validation_data_rate)  # 검증 데이터
-    test_size = int(dataset_size * test_data_rate)  # 검증 데이터
 
     # 학습, 검증, 테스트 데이터를 무작위로 나누기
-    train_dataset, validation_dataset, test_dataset = random_split(dataset, [train_size, validation_size, test_size])
+    train_dataset, validation_dataset = random_split(dataset, [train_size, validation_size])
     print(f"Training Data Size : {len(train_dataset)}")
     print(f"Validation Data Size : {len(validation_dataset)}")
-    print(f"Test Data Size : {len(test_dataset)}")
 
-    return train_dataset, validation_dataset, test_dataset
+    return train_dataset, validation_dataset
 
 
 def train_model(
@@ -143,19 +138,16 @@ def train_model(
         model,
         # 손실 함수 (ex : nn.MSELoss())
         criterion,
+        # 옵티마이저 (ex : optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay))
+        optimizer,
         # 학습 데이터 로더
         train_dataloader,
         num_epochs=1000,  # 학습 에포크 수
         validation_dataloader=None,  # 검증 데이터 로더(None 이라면 검증은 하지 않음)
-        learning_rate=0.0001,  # 학습률
         # 체크포인트 파일 저장 폴더 경로 - None 이라면 저장하지 않음 (ex : "../check_points")
         check_point_file_save_directory_path=None,
         # 불러올 체크포인트 파일 경로 - None 이라면 불러 오지 않음 (ex : "../check_points/checkpoint(2024_02_29_17_51_09_330).pt")
         check_point_load_file_full_path=None,
-        # 가중치 감쇠 (L2 정칙화와 동일, ex : 0.001)
-        weight_decay=None,
-        # 모멘텀 값 (일반적으로 0.9 사용)
-        momentum=0.9,
         # 그래디언트 클리핑 기울기 최대 값 (ex : 1)
         # 그래디언트 최대값을 설정하여, 그래디언트 폭주를 막아 오버피팅을 억제합니다.
         # RNN 등 기울기가 폭주될 가능성이 있는 모델에 적용 하세요.
@@ -170,12 +162,6 @@ def train_model(
 
     # 손실 함수 디바이스 설정
     criterion.to(device)
-
-    # 옵티마이저
-    if weight_decay is None:
-        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    else:
-        optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
 
     # 모델에 학습 모드 설정 (Dropout, Batchnorm 등의 기능 활성화)
     model.train()

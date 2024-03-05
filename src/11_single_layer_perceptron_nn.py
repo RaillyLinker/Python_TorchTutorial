@@ -4,6 +4,7 @@ from torch.utils.data import DataLoader
 import utils.torch_util as tu
 import model_layers.single_layer_perceptron.main_model as single_layer_perceptron
 import os
+from torch import optim
 
 """
 [단일 퍼셉트론]
@@ -19,39 +20,36 @@ def main():
     # 사용 가능 디바이스
     device = tu.get_gpu_support_device(gpu_support=True)
 
-    # 모델 생성
-    model = single_layer_perceptron.MainModel()
-
     # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
-    dataset = tu.ModelDataset(
+    dataset = tu.CsvModelDataset(
         csv_file_full_url="../_datasets/perceptron.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
 
-    train_dataset, validation_dataset, test_dataset = tu.split_dataset(
+    train_dataset, validation_dataset = tu.split_dataset(
         dataset=dataset,
         train_data_rate=0.8,
-        validation_data_rate=0.1,
-        test_data_rate=0.1
+        validation_data_rate=0.2
     )
 
     train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True, drop_last=True)
     validation_dataloader = DataLoader(validation_dataset, batch_size=10, shuffle=True, drop_last=True)
+
+    # 모델 생성
+    model = single_layer_perceptron.MainModel()
 
     # 모델 학습
     tu.train_model(
         device=device,
         model=model,
         criterion=nn.BCELoss(),
+        optimizer=optim.SGD(model.parameters(), lr=0.0001, momentum=0.9, weight_decay=0.001),
         train_dataloader=train_dataloader,
         num_epochs=10000,
         validation_dataloader=validation_dataloader,
-        learning_rate=0.0001,
         check_point_file_save_directory_path="../check_point_files/binary_classification",
-        # check_point_load_file_full_path="../check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt",
-        weight_decay=0.001,
-        momentum=0.9
+        # check_point_load_file_full_path="../check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt"
     )
 
     # 모델 저장

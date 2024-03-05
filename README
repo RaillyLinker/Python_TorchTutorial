@@ -1,5 +1,5 @@
->> pip list --format=freeze > mac_cpu_requirements.txt
->> pip install -r mac_cpu_requirements.txt
+>> pip list --format=freeze > _requirements/mac_cpu_requirements.txt
+>> pip install -r _requirements/mac_cpu_requirements.txt
 
->> pip list --format=freeze > windows_gpu_requirements.txt
->> pip install -r windows_gpu_requirements.txt
+>> pip list --format=freeze > _requirements/windows_gpu_requirements.txt
+>> pip install -r _requirements/windows_gpu_requirements.txt

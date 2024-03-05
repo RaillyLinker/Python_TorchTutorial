@@ -5,6 +5,11 @@ from tokenizers.normalizers import Sequence, NFD, Lowercase
 from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.decoders import WordPiece as WordPieceDecoder
 
+"""
+[tokenizers]
+아래 코드는 tokenizers 라이브러리를 사용하여 word piece 토크나이징을 실행하는 방법을 정리한 것입니다.
+"""
+
 # Korpora : 국립 국어원, 혹은 AI Hub 에서 제공하는 한국어 말뭉치 데이터를 쉽게 사용할 수 있게 제공하는 오픈소스 라이브러리
 # 말뭉치가 크고 양질일 수록 토크나이저의 성능은 좋아집니다.
 

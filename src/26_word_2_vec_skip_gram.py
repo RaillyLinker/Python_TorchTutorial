@@ -10,27 +10,37 @@ import numpy as np
 from numpy.linalg import norm
 import utils.torch_util as tu
 
+"""
+[Word2Vec]
+Word2Vec 은 2013 년 구글에서 공개한 임베딩 모델로 단어 간의 유사성을 측정하기 위해 분포 가설을 기반으로 개발되었습니다.
+분포 가설은 단어 간의 동시 발생 확률 분포를 이용해 단어 간의 유사성을 측정합니다.
 
-# [Word2Vec]
-# Word2Vec 은 2013 년 구글에서 공개한 임베딩 모델로 단어 간의 유사성을 측정하기 위해 분포 가설을 기반으로 개발되었습니다.
-# 분포 가설은 단어 간의 동시 발생 확률 분포를 이용해 단어 간의 유사성을 측정합니다.
-# 문맥상 동일한 위치에 존재하는 단어끼리는 서로 비슷한 의미를 지닌다는 것으로,
-# 내일 '자동차'를 타고 부산에 간다 와 내일 '비행기'를 타고 부산에 간다 라는 두 문장에서
-# 자동차와 비행기는 문맥상의 유사도와 탈것이라는 의미적 유사성을 지니고 있음을 알 수 있습니다.
-# 즉, 문장에서 특정 단어가 들어가는 문맥상 특정 부위를 비워둠으로써 해당 위치에 올 단어를 예측하는 모델을 학습시키면 해당 모델은 단어의 의미를 품고 있는
-# 투사층을 가지게 되는 것입니다. (학습시에는 예측 부분까지 사용하고, 의미 압축시에는 예측 부분을 제외한 투사층의 벡터가 의미 벡터 역할을 합니다.)
-# 입력층에는 고유한 단어를 의미 하는 One-Hot-Vector 을 n 개 넣어주고, 이를 투사층으로 압축한 후,
-# 출력층으로는 예측하는 단어의 One-Hot-Vector 를 출력하도록 학습하면, 단어의 의미를 압축하는 임베딩 모델을 만들 수 있습니다.
-# 위와 같은 방법을 CBoW 라고 합니다.
-# CBoW(Continuous Bag of Words) 는 위와 같이 주변 단어들을 가지고 해당 구역의 하나의 단어를 출력하도록 학습하는 방식입니다.
-# 다른 방식으로는 Skip-gram 이 있으며, 이는 중심 단어 하나를 입력받아서, 주변 단어들을 예측하도록 하여 학습하는 방식입니다.
-# 일반적으로는 Skip-Gram 이 CBoW 보다 성능이 좋다고 합니다.
+문맥상 동일한 위치에 존재하는 단어끼리는 서로 비슷한 의미를 지닌다는 것으로,
+내일 '자동차'를 타고 부산에 간다 와 내일 '비행기'를 타고 부산에 간다 라는 두 문장에서
+자동차와 비행기는 문맥상의 유사도와 탈것이라는 의미적 유사성을 지니고 있음을 알 수 있습니다.
 
-# todo [계층적 소프트맥스]
-# todo [Negative Sampling]
+즉, 문장에서 특정 단어가 들어가는 문맥상 특정 부위를 비워둠으로써 해당 위치에 올 단어를 예측하는 모델을 학습시키면 해당 모델은 단어의 의미를 품고 있는
+투사층을 가지게 되는 것입니다. (학습시에는 예측 부분까지 사용하고, 의미 압축시에는 예측 부분을 제외한 투사층의 벡터가 의미 벡터 역할을 합니다.)
+위 예시 문장뿐 아니라 자동차와 비행기라는 단어가 들어가는 더 많고 다양한 예시들을 가지고 예측 모델을 학습시킨다면 탈것이라는 의미뿐 아니라
+더 상세한 정보가 담긴 투사층이 학습될 것입니다.
+
+입력층에는 고유한 단어를 의미 하는 One-Hot-Vector 을 n 개 넣어주고, 이를 투사층으로 압축한 후,
+출력층으로는 예측하는 단어의 One-Hot-Vector 를 출력하도록 학습하면, 단어의 의미를 압축하는 임베딩 모델을 만들 수 있습니다.
+위와 같은 방법을 CBoW 라고 합니다.
+
+CBoW(Continuous Bag of Words) 는 위와 같이 주변 단어들을 가지고 해당 구역의 하나의 단어를 출력하도록 학습하는 방식입니다.
+
+다른 방식으로는 Skip-gram 이 있으며, 이는 중심 단어 하나를 입력 받아서, 주변 단어들을 예측하도록 하여 학습하는 방식입니다.
+
+일반적으로는 Skip-Gram 이 CBoW 보다 성능이 좋다고 합니다.
+
+아래 코드는 torch 모델을 가지고 기본적인 Skip-Gram 을 구현하는 방법을 정리합니다.
+물론 성능이 더 좋은 여러 기법을 적용한 라이브러리가 존재하며, 그 사용법은 다음 글에 정리하겠습니다.
+"""
+
 
 # 기본 형식 Skip-gram 구현
-class VanillaSkipgram(nn.Module):
+class VanillaSkipGram(nn.Module):
     def __init__(self, vocab_size, embedding_dim):
         super().__init__()
         self.embedding = nn.Embedding(
@@ -173,7 +183,7 @@ dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 device = tu.get_gpu_support_device(gpu_support=True)
 
 # 기본 Word2Vec SkipGram 모델 생성
-word2vec = VanillaSkipgram(vocab_size=len(vocab_token_to_id), embedding_dim=128).to(device)
+word2vec = VanillaSkipGram(vocab_size=len(vocab_token_to_id), embedding_dim=128).to(device)
 criterion = nn.CrossEntropyLoss().to(device)
 optimizer = optim.SGD(word2vec.parameters(), lr=0.1)
 

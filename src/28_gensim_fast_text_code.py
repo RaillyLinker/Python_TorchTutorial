@@ -1,9 +1,13 @@
 from Korpora import Korpora
 from gensim.models import FastText
 
-# fastText 란, 2015 년 메타의 FAIR 연구소에서 개발한 오픈소스 임베딩 모델입니다.
-# N-Gram 을 사용 하여 하위 단어를 고려 하며, Word2Vec 보다 더 높은 정확도와 성능을 제공한다고 합니다.
-# 또한, Word2Vec 과는 달리 OOV 단어를 대상으로도 의미 있는 임베딩을 추출할 수 있다고 합니다.
+"""
+[Gensim fastText]
+fastText 란, 
+2015 년 메타의 FAIR 연구소에서 개발한 오픈소스 임베딩 모델입니다.
+N-Gram 을 사용 하여 하위 단어를 고려 하며, Word2Vec 보다 더 높은 정확도와 성능을 제공한다고 합니다.
+또한, Word2Vec 과는 달리 OOV 단어를 대상으로도 의미 있는 임베딩을 추출할 수 있다고 합니다.
+"""
 
 # 한국어 자연어 이해 데이터셋(Korean Natural Language Inference) 말뭉치 로딩
 # kornli 는, 자연어 추론을 위한 데이터 셋으로, 자연어 추론이란, 두개 이상의 문장이 주어졌을 때, 두 문장 간의 관계를 분류하는 작업을 의미합니다.

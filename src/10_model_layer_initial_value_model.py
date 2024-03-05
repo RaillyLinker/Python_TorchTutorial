@@ -2,10 +2,12 @@ import torch
 from torch import nn
 import utils.torch_util as tu
 
+"""
+[모델 파라미터 초기화]
+아래 코드는 토치에서 제공하는 NN 레이어의 파라미터를 수동으로 설정할 수 있다는 것을 보여줍니다.
+주로 적절한 초기값을 설정하여 모델 학습을 보조하는 방식으로 사용 합니다.
+"""
 
-# [모델 파라미터 초기화]
-# 아래 코드는 토치에서 제공하는 NN 레이어의 파라미터를 수동으로 설정할 수 있다는 것을 보여줍니다.
-# 주로 적절한 초기값을 설정하여 모델 학습을 보조하는 용도로 사용합니다.
 
 class CustomModel(nn.Module):
     def __init__(self):

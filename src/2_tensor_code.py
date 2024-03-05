@@ -1,8 +1,10 @@
 import torch
 import numpy as np
 
-# [텐서 다루기]
-# 아래 코드는 Torch 의 기본 데이터 구조 객체인 Tensor 를 다루는 예시입니다.
+"""
+[텐서 다루기]
+아래 코드는 Torch 의 기본 데이터 구조 객체인 Tensor 를 다루는 예시입니다.
+"""
 
 # 텐서 생성
 print("텐서 생성")

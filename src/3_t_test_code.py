@@ -4,10 +4,12 @@ import seaborn as sns
 from scipy import stats
 from matplotlib import pyplot as plt
 
-# [T-Test 코드]
-# 아래 코드는 기본적인 통계 기법인 T-Test 를 넘파이로 구현하여 확인한 것입니다.
-# 독립변수인 신장 데이터가 종속 변수인 성별 라벨 데이터에 유의한 영향을 끼치는지를 확인합니다.
-# 데이터 선정 단계에서 사용하는 기법의 일종입니다.
+"""
+[T-Test 코드]
+아래 코드는 기본적인 통계 기법인 T-Test 를 넘파이로 구현하여 확인한 것입니다.
+독립변수인 신장 데이터가 종속 변수인 성별 라벨 데이터에 유의한 영향을 끼치는지를 확인합니다.
+데이터 선정 단계에서 사용하는 기법의 일종입니다.
+"""
 
 # 표준분포에 따른 데이터 생성
 man_height = stats.norm.rvs(loc=170, scale=10, size=500, random_state=1)

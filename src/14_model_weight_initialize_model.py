@@ -1,7 +1,12 @@
 from torch import nn
 
+"""
+[모델에서 가중치를 초기화 하는 방법]
+가중치를 초기화 한 모델 사용 방법입니다.
+앞으로 모델을 작성할 때에는 아래와 같이 초기화를 설정하는 것이 좋습니다.
+"""
 
-# 가중치를 초기화 한 모델 사용 방법
+
 class MainModel(nn.Module):
     def __init__(self):
         super().__init__()

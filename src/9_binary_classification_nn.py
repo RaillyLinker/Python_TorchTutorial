@@ -5,10 +5,12 @@ import utils.torch_util as tu
 import model_layers.binary_classification.main_model as binary_classification
 import os
 
+"""
+[이진 분류 모델 - 토치 모델]
+아래 코드는 이진 분류 모델을 본격적으로 토치 모델로 만들어 사용하는 예시를 보여줍니다.
+앞서 작성한 NN 모델 템플릿대로 작성 하였습니다.
+"""
 
-# [이진 분류 모델 - 토치 모델]
-# 아래 코드는 이진 분류 모델을 본격적으로 토치 모델로 만들어 사용하는 예시를 보여줍니다.
-# 앞서 작성한 NN 모델 템플릿대로 작성 하였습니다.
 
 def main():
     # 사용 가능 디바이스

@@ -2,9 +2,11 @@ import nltk
 from nltk import tokenize
 from nltk import tag
 
-# [NLTK (Natural Language Toolkit) 이란]
-# 자연어 처리를 위해 개발된 라이브러리로, 토큰화, 형태소 분석, 구문 분석, 개체명 인식, 감정 분석 등의 기능을 제공합니다.
-# 아래 코드는
+"""
+[NLTK (Natural Language Toolkit) 란]
+자연어 처리를 위해 개발된 라이브러리로, 토큰화, 형태소 분석, 구문 분석, 개체명 인식, 감정 분석 등의 기능을 제공 합니다.
+아래 코드는 NLTK 를 사용하여 단어를 토큰화 하는 예시입니다.
+"""
 
 sentence = "Those who can imagine anything, can create the impossible."
 

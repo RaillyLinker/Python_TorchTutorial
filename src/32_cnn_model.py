@@ -1,6 +1,11 @@
 import torch
 from torch import nn
 
+"""
+[합성곱 신경망 모델]
+아래는 합성곱 신경망 CNN 레이어를 사용하여 모델을 만드는 예시입니다.
+"""
+
 
 class CNN(nn.Module):
     def __init__(self):

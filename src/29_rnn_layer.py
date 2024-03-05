@@ -1,6 +1,12 @@
 import torch
 from torch import nn
 
+"""
+[RNN]
+RNN 에 대한 설명은 생략 합니다.
+아래 코드는 torch 에서 제공하는 RNN 레이어를 생성하여 순전파 하는 예시 입니다.
+"""
+
 input_size = 128
 ouput_size = 256
 num_layers = 3

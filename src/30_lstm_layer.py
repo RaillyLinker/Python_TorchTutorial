@@ -1,6 +1,13 @@
 import torch
 from torch import nn
 
+"""
+[LSTM]
+LSTM 에 대한 설명은 생략 합니다.
+아래 코드는 torch 에서 제공하는 LSTM 레이어를 생성하여 순전파 하는 예시 입니다.
+동일한 구조인 GRU 역시 아래와 같은 방식으로 사용하면 됩니다.
+"""
+
 input_size = 128
 ouput_size = 256
 num_layers = 3

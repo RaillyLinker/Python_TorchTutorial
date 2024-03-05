@@ -9,6 +9,12 @@ from torch.utils.data import TensorDataset, DataLoader
 from gensim.models import Word2Vec
 from torch import optim
 
+"""
+[순환 신경망 모델 문장 분류기]
+RNN, LSTM 을 이용한 문장 분류기를 만들 것입니다.
+문장을 입력 하면, 해당 문장에 포함된 감정을 분석 하여 분류 하는 모델입니다.
+"""
+
 
 class SentenceClassifier(nn.Module):
     def __init__(

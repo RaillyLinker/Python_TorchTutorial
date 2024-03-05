@@ -3,8 +3,11 @@ from Korpora import Korpora
 from konlpy.tag import Okt
 from gensim.models import Word2Vec
 
-# gensim 라이브러리의 Word2Vec 은 계층적 소프트맥스나 네거티브 샘플링 등의 기법을 사용 하여 보다 쉽고 효과적으로 텍스트 임베딩 학습을 하도록 제공 해 줍니다.
-# 또한 Cython 을 이용하여 C++ 기반 병렬처리 등으로 파이토치 임베딩 모델보다 더 빠른 속도를 보장합니다.
+"""
+[Gensim Word 2 Vec]
+gensim 라이브러리의 Word2Vec 은 계층적 소프트맥스나 네거티브 샘플링 등의 기법을 사용 하여 보다 쉽고 효과적으로 텍스트 임베딩 학습을 하도록 제공 해 줍니다.
+또한 Cython 을 이용하여 C++ 기반 병렬처리 등으로 파이토치 임베딩 모델보다 더 빠른 속도를 보장합니다.
+"""
 
 # 학습할 네이버 영화 리뷰 데이터셋 말뭉치 로딩
 corpus = Korpora.load("nsmc")
@@ -49,6 +52,9 @@ word2vec = Word2Vec.load("../by_product_files/word2vec.model")
 
 # 모델 테스트
 word = "연기"
+# 단어에 대한 임베딩 벡터 출력
 print(word2vec.wv[word])
+# 단어와 가장 비슷한 5 개의 단어 선정 및 유사도 확인
 print(word2vec.wv.most_similar(word, topn=5))
+# 두 단어간 유사도 확인
 print(word2vec.wv.similarity(w1=word, w2="연기력"))

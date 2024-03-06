@@ -4,6 +4,7 @@ from tokenizers.models import WordPiece
 from tokenizers.normalizers import Sequence, NFD, Lowercase
 from tokenizers.pre_tokenizers import Whitespace
 from tokenizers.decoders import WordPiece as WordPieceDecoder
+import os
 
 """
 [tokenizers]
@@ -44,16 +45,20 @@ with open("../_datasets/corpus.txt", "w", encoding="utf-8") as f:
         # 파일 내에 한줄씩 데이터 저장
         f.write(petition + "\n")
 
+model_file_save_directory_path = "../_by_product_files"
+if not os.path.exists(model_file_save_directory_path):
+    os.makedirs(model_file_save_directory_path)
+
 # corpus.txt 말뭉치 데이터를 사용하여 토크나이저 모델 학습
 print("corpus.txt 말뭉치 데이터를 사용하여 토크나이저 모델 학습")
 tokenizer = Tokenizer(WordPiece())
 tokenizer.normalizer = Sequence([NFD(), Lowercase()])
 tokenizer.pre_tokenizer = Whitespace()
 tokenizer.train(["../_datasets/corpus.txt"])
-tokenizer.save("../by_product_files/petition_wordpiece.json")
+tokenizer.save("../_by_product_files/petition_wordpiece.json")
 
 # 토크나이저 모델을 불러오고 테스트
-tokenizer = Tokenizer.from_file("../by_product_files/petition_wordpiece.json")
+tokenizer = Tokenizer.from_file("../_by_product_files/petition_wordpiece.json")
 tokenizer.decoder = WordPieceDecoder()
 sentence = "안녕하세요, 토크나이저가 잘 학습되었군요!"
 sentences = ["이렇게 입력값을 리스트로 받아서", "쉽게 토크나이저를 사용할 수 있답니다"]

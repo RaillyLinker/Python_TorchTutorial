@@ -150,7 +150,7 @@ hidden_dim = 64
 embedding_dim = 128
 n_layers = 2
 
-word2vec = Word2Vec.load("../by_product_files/word2vec.model")
+word2vec = Word2Vec.load("../_by_product_files/word2vec.model")
 init_embeddings = np.zeros((n_vocab, embedding_dim))
 
 for index, token in id_to_token.items():

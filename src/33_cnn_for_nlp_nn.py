@@ -100,7 +100,7 @@ def main():
     n_vocab = len(token_to_id)
     embedding_dim = 128
     init_embeddings = np.zeros((n_vocab, embedding_dim))
-    word2vec = Word2Vec.load("../by_product_files/word2vec.model")
+    word2vec = Word2Vec.load("../_by_product_files/word2vec.model")
     for index, token in id_to_token.items():
         if token not in ["<pad>", "<unk>"]:
             init_embeddings[index] = word2vec.wv[token]

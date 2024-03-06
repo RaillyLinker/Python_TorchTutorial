@@ -159,7 +159,7 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-/check_point_files/**
+/_check_point_files/**
 /_datasets/corpus.txt
-/model_files/**
-/by_product_files/**
+/_model_files/**
+/_by_product_files/**

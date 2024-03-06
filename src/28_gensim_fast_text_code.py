@@ -1,5 +1,6 @@
 from Korpora import Korpora
 from gensim.models import FastText
+import os
 
 """
 [Gensim fastText]
@@ -49,10 +50,13 @@ fastText = FastText(
 )
 
 # 학습된 모델을 저장
-fastText.save("../by_product_files/fastText.model")
+model_file_save_directory_path = "../_by_product_files"
+if not os.path.exists(model_file_save_directory_path):
+    os.makedirs(model_file_save_directory_path)
+fastText.save("../_by_product_files/fastText.model")
 
 # 모델 파일에서 불러오기
-fastText = FastText.load("../by_product_files/fastText.model")
+fastText = FastText.load("../_by_product_files/fastText.model")
 
 # OOV 테스트
 oov_token = "사랑해요"

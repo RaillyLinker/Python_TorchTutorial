@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 
 
-# GPU 디바이스 값 반환
+# (GPU 디바이스 값 반환)
 def get_gpu_support_device(
         # GPU 지원 설정 (True 로 설정 해도 현재 디바이스가 GPU 를 지원 하지 않으면 CPU 를 사용 합니다.)
         gpu_support
@@ -24,17 +24,14 @@ def get_gpu_support_device(
     return device
 
 
-# 모델 파일 저장
+# (모델 파일 저장)
 def save_model_file(
         # 파일로 저장할 모델 객체
         model,
-        # 생성된 모델 파일을 저장할 폴더 위치 (ex : "../models")
+        # 생성된 모델 파일을 저장할 폴더 위치 (ex : "../_model_files")
         model_file_save_directory_path
 ):
-    current_time = datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]
-    model_file_name = f"model({current_time}).pt"
-
-    save_file_full_path = f"{model_file_save_directory_path}/{model_file_name}"
+    save_file_full_path = f"{model_file_save_directory_path}/model({datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]}).pt"
     torch.save(
         model,
         save_file_full_path
@@ -44,54 +41,28 @@ def save_model_file(
     return save_file_full_path
 
 
-# CSV 파일을 읽고 데이터를 반환 합니다.
-# output ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...]
-def get_csv_file_data(
-        # CSV 파일 경로 (ex : "../_datasets/linear.csv")
-        csv_file_full_url,
-        # x 컬럼 라벨 리스트 (ex : ['x1', 'x2'])
-        x_column_labels,
-        # y 컬럼 라벨 리스트 (ex : ['y1'])
-        y_column_labels
-):
-    # CSV 파일 읽기
-    data_frame = pd.read_csv(csv_file_full_url)
-
-    # 데이터 프레임을 리스트로 변환
-    data_list = data_frame.to_dict(orient='records')
-
-    # 데이터 가공
-    formatted_data = []
-    for item in data_list:
-        x_values = [item[column] for column in x_column_labels]
-        y_values = [item[y_column] for y_column in y_column_labels]
-        formatted_data.append({'x': x_values, 'y': y_values})
-
-    print(f"CSV File Data : {formatted_data}")
-    return formatted_data
-
-
-# 모델 사용 데이터 셋
+# (모델 사용 데이터 셋)
 class CsvModelDataset(Dataset):
     def __init__(
             self,
+            # 데이터를 읽어올 CSV 파일 경로 - 1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다. (ex : "../_datasets/linear.csv")
             csv_file_full_url,
+            # 독립 변수로 사용할 컬럼의 라벨명 리스트 (ex : ['x1', 'x2'])
             x_column_labels,
+            # 종속 변수로 사용할 컬럼의 라벨명 리스트 (ex : ['y1'])
             y_column_labels
     ):
         # CSV 에서 데이터 가져오기 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
-        csv_data = get_csv_file_data(
-            csv_file_full_url=csv_file_full_url,
-            x_column_labels=x_column_labels,
-            y_column_labels=y_column_labels
-        )
+        # CSV 파일 읽기
+        data_frame = pd.read_csv(csv_file_full_url)
 
+        # # 데이터 프레임을 변환 (ex : [{x : [x1, x2], y : [y1]}, {x : [x1, x2], y : [y1]}, ...])
         self.data = [
             {
-                "x": item["x"],
-                "y": item["y"]
+                "x": [item[column] for column in x_column_labels],
+                "y": [item[y_column] for y_column in y_column_labels]
             }
-            for item in csv_data
+            for item in data_frame.to_dict(orient='records')
         ]
         self.length = len(self.data)
 
@@ -102,13 +73,13 @@ class CsvModelDataset(Dataset):
         return self.length
 
 
-# Dataset 분리
+# (Dataset 분리)
 def split_dataset(
         # 분리할 데이터 셋
         dataset,
         # 학습 데이터 비율 (ex : 0.8)
         train_data_rate,
-        # 검증 데이터 비율 (ex : 0.1)
+        # 검증 데이터 비율 (ex : 0.2)
         validation_data_rate
 ):
     # rate 파라미터들의 합이 1인지 확인
@@ -131,6 +102,7 @@ def split_dataset(
     return train_dataset, validation_dataset
 
 
+# (모델 학습)
 def train_model(
         # 사용할 디바이스
         device,

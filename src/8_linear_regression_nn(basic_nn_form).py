@@ -20,7 +20,8 @@ def main():
     # 사용 가능 디바이스
     device = tu.get_gpu_support_device(gpu_support=True)
 
-    # 데이터셋 객체 생성 (ex : tensor([[-10., 100.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    # CSV 파일로 데이터셋 형성 (1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다.)
     dataset = tu.CsvModelDataset(
         csv_file_full_url="../_datasets/linear.csv",
         x_column_labels=['x1', 'x2'],
@@ -35,7 +36,7 @@ def main():
     )
 
     # 데이터 로더 래핑
-    train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True, drop_last=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=128, shuffle=True, drop_last=True)
     validation_dataloader = DataLoader(validation_dataset, batch_size=10, shuffle=True, drop_last=True)
 
     # 모델 생성

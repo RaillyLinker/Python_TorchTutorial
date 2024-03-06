@@ -21,6 +21,9 @@ train_y = np.array(
      [17.46], [19.8], [18], [21.34], [22], [22.5], [24.57], [26.04], [21.6], [28.8]]
 )
 
+# 입력 데이터 정규화 (평균 0, 표준 편차 1 이 되도록 수정)
+train_x_normalized = (train_x - np.mean(train_x)) / np.std(train_x)
+
 # 선형 회귀 모델(y = (x * w) + b) 를 이루는 학습 가능한 파라미터(w, b)
 model_weight = 0.0
 model_bias = 0.0
@@ -31,15 +34,19 @@ epoch_n = 10000
 learning_rate = 0.005
 
 for epoch in range(epoch_n):
-    # 선형 회귀 모델 순전파
-    model_out = model_weight * train_x + model_bias
+    # 모델 예측
+    model_out = train_x_normalized * model_weight + model_bias
 
-    # 예측 실패 정도 측정용 손실 함수(MSE)
-    model_loss = ((train_y - model_out) ** 2).mean()
+    # 손실 계산 (MSE)
+    model_loss = np.mean((model_out - train_y) ** 2)
 
-    # 1 에폭마다 모델 파라미터 수정
-    model_weight = model_weight - learning_rate * ((model_out - train_y) * train_x).mean()
-    model_bias = model_bias - learning_rate * (model_out - train_y).mean()
+    # 기울기 계산
+    d_weight = 2 * np.mean((model_out - train_y) * train_x_normalized)
+    d_bias = 2 * np.mean(model_out - train_y)
+
+    # 경사 하강법으로 모델 파라미터 갱신
+    model_weight -= learning_rate * d_weight
+    model_bias -= learning_rate * d_bias
 
     if (epoch + 1) % 1000 == 0:
         # 1000 에폭마다 로깅

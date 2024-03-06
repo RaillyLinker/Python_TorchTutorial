@@ -23,19 +23,22 @@ def main():
     device = tu.get_gpu_support_device(gpu_support=True)
 
     # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    # CSV 파일로 데이터셋 형성 (1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다.)
     dataset = tu.CsvModelDataset(
         csv_file_full_url="../_datasets/perceptron.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
 
+    # 학습용, 검증용, 테스트용 데이터를 비율에 따라 분리
     train_dataset, validation_dataset = tu.split_dataset(
         dataset=dataset,
         train_data_rate=0.8,
         validation_data_rate=0.2
     )
 
-    train_dataloader = DataLoader(train_dataset, batch_size=10, shuffle=True, drop_last=True)
+    # 데이터 로더 래핑
+    train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True, drop_last=True)
     validation_dataloader = DataLoader(validation_dataset, batch_size=10, shuffle=True, drop_last=True)
 
     # 모델 생성
@@ -50,12 +53,12 @@ def main():
         train_dataloader=train_dataloader,
         num_epochs=10000,
         validation_dataloader=validation_dataloader,
-        check_point_file_save_directory_path="../_check_point_files/binary_classification",
+        check_point_file_save_directory_path="../_check_point_files/multi_layer_perceptron",
         # check_point_load_file_full_path="../_check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt"
     )
 
     # 모델 저장
-    model_file_save_directory_path = "../_model_files/binary_classification"
+    model_file_save_directory_path = "../_model_files/multi_layer_perceptron"
     if not os.path.exists(model_file_save_directory_path):
         os.makedirs(model_file_save_directory_path)
     save_file_full_path = tu.save_model_file(

@@ -41,7 +41,7 @@ criterion = nn.MSELoss()
 # 옵티마이저
 optimizer = optim.SGD(model.parameters(), lr=0.001)
 
-for epoch in range(20000):
+for epoch in range(10000):
     # 에폭별 손실값
     epoch_loss = 0.0
 

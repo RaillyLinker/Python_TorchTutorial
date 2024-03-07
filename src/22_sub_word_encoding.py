@@ -1,3 +1,5 @@
+import re, collections
+
 """
 [하위 단어 토크나이징]
 인간이 이해하는 방식으로 자연어 데이터 분석을 하기 위해서는 공백 단위 텍스트 분리보다는 형태소 단위의 텍스트 분리가 효과적일 것입니다.
@@ -64,9 +66,149 @@ BPE을 요약하면, 글자(charcter) 단위에서 점차적으로 단어 집합
 예를 들어, 'un-'와 같은 접두사나 '-ing'과 같은 접미사를 포함한 단어들은 학습 과정에서 직접 마주치지 않았더라도,
 이들의 구성 요소를 통해 의미를 유추할 수 있습니다.
 BPE는 따라서 언어 모델이 새로운 단어나 희귀 단어에 대해 더 나은 일반화(generalization) 능력을 가지도록 돕습니다.
+
+(BPE 의 구현)
+먼저, 말뭉치에서 단어를 추려옵니다.
+
+# dictionary
+l o w : 5,  l o w e r : 2,  n e w e s t : 6,  w i d e s t : 3
+
+위와 같이 말뭉치 안에서 찾아낸 단어와, 해당 단어가 몇번 사용되었는지에 대한 카운트를 준비해둡니다.
+low 가 5 번, lower 가 2번... 이렇게 준비하고, 글자 단위로 나누어(바이트 단위로) 준비하세요.
+
+이때는 글자 단위로 나뉜 것이므로 중첩되지 않는 글자들을 모두 사전으로 등록하면 됩니다.
+
+l, o, w, e, r, n, s, t, i, d
+
+이렇게 초기 사전이 형성 되네요.
+
+자, 이제부터는 위에서 간단히 설명한대로 탐색 및 치환을 반복하면 됩니다.
+
+먼저 위 데이터에서 탐색을 해봅시다.
+
+2개씩 탐색을 하니, e s 가 빈도가 가장 많네요.
+newest 가 말뭉치에서 6번, widest 가 3 번 탐색되었으니 합쳐서 9번 발생한 것이 됩니다.
+
+그러면 이를 치환합시다.
+
+이때, 압축을 위한 것이 아니라 하위 단어를 선정하기 위한 것이므로,
+e, s 가 아니라 es 로 합쳐서
+
+l o w : 5,
+l o w e r : 2,
+n e w es t : 6,
+w i d es t : 3
+
+이렇게 됩니다.
+이제 기존 사전에서 es 가 합쳐져서,
+
+l, o, w, e, r, n, s, t, i, d, es
+
+사전은 위와 같이 될 것입니다.
+
+자, 한번 탐색 및 치환을 했습니다.
+이제 다음 탐색을 해봅시다.
+
+다음에는 치환된 es 와 t 가 쌍으로 하여 빈도가 9번으로 가장 많네요.
+
+l o w : 5,
+l o w e r : 2,
+n e w est : 6,
+w i d est : 3
+
+l, o, w, e, r, n, s, t, i, d, es, est
+
+위와 같이 치환됩니다.
+
+다음으로 빈도가 많은 쌍은 또 뭘까요?
+
+l 과 o 입니다.
+
+lo w : 5,
+lo w e r : 2,
+n e w est : 6,
+w i d est : 3
+
+l, o, w, e, r, n, s, t, i, d, es, est, lo
+
+이러합니다.
+
+이렇게 반복하여 10번을 실행하였다고 한다면,
+
+low : 5,
+low e r : 2,
+newest : 6,
+widest : 3
+
+l, o, w, e, r, n, s, t, i, d, es, est, lo, low, ne, new, newest, wi, wid, widest
+
+이렇게 되네요.
+
+자, 보다시피 글자에서 시작하여 단어가 합성되어가며 단어 사전을 만들 수 있음을 알 수 있습니다.
+
+이와 같이 하여 OOV 를 줄일 수 있습니다.
+
+실제 구현은 아래와 같습니다.
 """
 
-# todo https://wikidocs.net/22592
+# BPE 구현
+# 탐색 -> 치환 반복 횟수
+num_merges = 10
+
+# 말뭉치에서 단어 / 빈도 사전 추출하기
+dictionary = {
+    'l o w': 5,
+    'l o w e r': 2,
+    'n e w e s t': 6,
+    'w i d e s t': 3
+}
+
+# 하위 단어 사전
+sub_word_vocab = []
+bpe_codes = {}
+bpe_codes_reverse = {}
+
+# 초기 단어 사전 구성
+sub_word_vocab_set = set()
+for key in dictionary.keys():
+    letters = [char for char in key if char.isalpha()]
+    sub_word_vocab_set.update(letters)
+
+sub_word_vocab = list(sub_word_vocab_set)
+print('초기 하위 단어 사전 :', sub_word_vocab, '\n')
+
+for i in range(num_merges):
+    print(i + 1)
+
+    # 유니그램의 pair들의 빈도수를 카운트
+    pairs = collections.defaultdict(int)
+    for word, freq in dictionary.items():
+        symbols = word.split()
+        for i in range(len(symbols) - 1):
+            pairs[symbols[i], symbols[i + 1]] += freq
+    print('현재 pair들의 빈도수 :', dict(pairs))
+
+    pairs = pairs
+    best = max(pairs, key=pairs.get)
+    v_out = {}
+    bigram = re.escape(' '.join(best))
+    p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
+    for word in dictionary:
+        w_out = p.sub(''.join(best), word)
+        v_out[w_out] = dictionary[word]
+    dictionary = v_out
+
+    sub_word_vocab.append(''.join(best))
+
+    bpe_codes[best] = i
+    bpe_codes_reverse[best[0] + best[1]] = best
+
+    print("new merge: {}".format(best))
+    print("dictionary: {}".format(dictionary))
+    print("sub_word_vocab: {}".format(sub_word_vocab))
+    print("bpe_codes: {}".format(bpe_codes))
+    print("bpe_codes_reverse: {}".format(bpe_codes_reverse))
+    print("")
 
 """
 [워드피스]

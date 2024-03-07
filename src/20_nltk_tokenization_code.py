@@ -19,7 +19,7 @@ nltk.download("averaged_perceptron_tagger")
 # 단어 토큰 (공백, 구두점 등의 정보로 단어를 분리합니다.)
 word_tokens = tokenize.word_tokenize(sentence)
 
-# 문장 토큰 (마침표, 느낌표, 물음표 등의 구두점을 기준으로 문장을 분리합니다.)
+# 문장 토큰 - 문장 단위로 토큰을 나눕니다. (마침표, 느낌표, 물음표 등의 구두점을 기준으로 문장을 분리합니다.)
 sent_tokens = tokenize.sent_tokenize(sentence)
 
 print("word_tokens")

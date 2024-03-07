@@ -28,7 +28,7 @@ def get_gpu_support_device(
 def save_model_file(
         # 파일로 저장할 모델 객체
         model,
-        # 생성된 모델 파일을 저장할 폴더 위치 (ex : "../_model_files")
+        # 생성된 모델 파일을 저장할 폴더 위치 (ex : "../_torch_model_files")
         model_file_save_directory_path
 ):
     save_file_full_path = f"{model_file_save_directory_path}/model({datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')[:-3]}).pt"
@@ -45,7 +45,7 @@ def save_model_file(
 class CsvModelDataset(Dataset):
     def __init__(
             self,
-            # 데이터를 읽어올 CSV 파일 경로 - 1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다. (ex : "../_datasets/linear.csv")
+            # 데이터를 읽어올 CSV 파일 경로 - 1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다. (ex : "../datasets/linear.csv")
             csv_file_full_url,
             # 독립 변수로 사용할 컬럼의 라벨명 리스트 (ex : ['x1', 'x2'])
             x_column_labels,
@@ -123,7 +123,9 @@ def train_model(
         # 그래디언트 클리핑 기울기 최대 값 (ex : 1)
         # 그래디언트 최대값을 설정하여, 그래디언트 폭주를 막아 오버피팅을 억제합니다.
         # RNN 등 기울기가 폭주될 가능성이 있는 모델에 적용 하세요.
-        grad_clip_max_norm=None
+        grad_clip_max_norm=None,
+        # 로그를 몇 에폭 만에 한번 실행 할지 여부 (0 이하는 로깅 하지 않음)
+        log_freq=1000
 ):
     # 학습 시작 시간 기록
     start_time = datetime.now()
@@ -178,7 +180,7 @@ def train_model(
         training_loss = training_loss / len(train_dataloader)
 
         # 1000 에 한번 실행
-        if (training_epoch + 1) % 1000 == 0:
+        if log_freq > 0 and (training_epoch + 1) % log_freq == 0:
             # 학습 시작부터 얼마나 시간이 지났는지 계산
             elapsed_time = datetime.now() - start_time
             validation_loss_string = "None"

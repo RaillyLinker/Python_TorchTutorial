@@ -40,12 +40,12 @@ print("청원 본문 :", petition.text[:30])
 # 청원 데이터를 텍스트 데이터로 저장
 print("청원 데이터를 텍스트 데이터로 저장")
 petitions = corpus.get_all_texts()
-with open("../_datasets/corpus.txt", "w", encoding="utf-8") as f:
+with open("../resources/datasets/corpus.txt", "w", encoding="utf-8") as f:
     for petition in petitions:
         # 파일 내에 한줄씩 데이터 저장
         f.write(petition + "\n")
 
-model_file_save_directory_path = "../_by_product_files"
+model_file_save_directory_path = "../_by_product_files/tokenizers_word_piece_tokenizer"
 if not os.path.exists(model_file_save_directory_path):
     os.makedirs(model_file_save_directory_path)
 
@@ -54,11 +54,11 @@ print("corpus.txt 말뭉치 데이터를 사용하여 토크나이저 모델 학
 tokenizer = Tokenizer(WordPiece())
 tokenizer.normalizer = Sequence([NFD(), Lowercase()])
 tokenizer.pre_tokenizer = Whitespace()
-tokenizer.train(["../_datasets/corpus.txt"])
-tokenizer.save("../_by_product_files/petition_wordpiece.json")
+tokenizer.train(["../resources/datasets/corpus.txt"])
+tokenizer.save("../_by_product_files/tokenizers_word_piece_tokenizer/petition_wordpiece.json")
 
 # 토크나이저 모델을 불러오고 테스트
-tokenizer = Tokenizer.from_file("../_by_product_files/petition_wordpiece.json")
+tokenizer = Tokenizer.from_file("../_by_product_files/tokenizers_word_piece_tokenizer/petition_wordpiece.json")
 tokenizer.decoder = WordPieceDecoder()
 sentence = "안녕하세요, 토크나이저가 잘 학습되었군요!"
 sentences = ["이렇게 입력값을 리스트로 받아서", "쉽게 토크나이저를 사용할 수 있답니다"]

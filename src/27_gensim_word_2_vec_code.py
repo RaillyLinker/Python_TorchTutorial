@@ -49,13 +49,13 @@ word2vec = Word2Vec(
 )
 
 # 학습된 모델을 저장
-model_file_save_directory_path = "../_by_product_files"
+model_file_save_directory_path = "../_by_product_files/gensim_word_2_vec"
 if not os.path.exists(model_file_save_directory_path):
     os.makedirs(model_file_save_directory_path)
-word2vec.save("../_by_product_files/word2vec.model")
+word2vec.save("../_by_product_files/gensim_word_2_vec/word2vec.model")
 
 # 모델 파일에서 불러오기
-word2vec = Word2Vec.load("../_by_product_files/word2vec.model")
+word2vec = Word2Vec.load("../_by_product_files/gensim_word_2_vec/word2vec.model")
 
 # 모델 테스트
 word = "연기"

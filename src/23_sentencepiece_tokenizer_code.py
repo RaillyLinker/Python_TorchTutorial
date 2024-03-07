@@ -38,7 +38,7 @@ print("청원 본문 :", petition.text[:30])
 # 청원 데이터를 텍스트 데이터로 저장
 print("청원 데이터를 텍스트 데이터로 저장")
 petitions = corpus.get_all_texts()
-with open("../_datasets/corpus.txt", "w", encoding="utf-8") as f:
+with open("../resources/datasets/corpus.txt", "w", encoding="utf-8") as f:
     for petition in petitions:
         # 파일 내에 한줄씩 데이터 저장
         f.write(petition + "\n")
@@ -57,19 +57,19 @@ print("corpus.txt 말뭉치 데이터를 사용하여 토크나이저 모델 학
 # eos_id : 문장이 끝나는 지점을 의미하는 토큰의 id (기본값 : 2)
 # 이외에는 SentencePiece 깃허브(https://github.com/google/sentencepiece)에서 확인
 
-model_file_save_directory_path = "../_by_product_files"
+model_file_save_directory_path = "../_by_product_files/sentencepiece_tokenizer"
 if not os.path.exists(model_file_save_directory_path):
     os.makedirs(model_file_save_directory_path)
 
 SentencePieceTrainer.Train(
-    "--input=../_datasets/corpus.txt\
-    --model_prefix=../_by_product_files/petition_bpe\
+    "--input=../resources/datasets/corpus.txt\
+    --model_prefix=../_by_product_files/sentencepiece_tokenizer/petition_bpe\
     --model_type=bpe"
 )
 
 # SentencePieceProcessor 에 .model 파일 로딩
 tokenizer = SentencePieceProcessor()
-tokenizer.load("../_by_product_files/petition_bpe.model")
+tokenizer.load("../_by_product_files/sentencepiece_tokenizer/petition_bpe.model")
 
 # sentencepiece 학습 결과 확인
 sentence = "안녕하세요, 토크나이저가 잘 학습되었군요!"

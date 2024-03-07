@@ -25,7 +25,7 @@ def main():
     # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
     # CSV 파일로 데이터셋 형성 (1 행에 라벨이 존재하고, 그 라벨로 x, y 데이터를 분류 합니다.)
     dataset = tu.CsvModelDataset(
-        csv_file_full_url="../_datasets/perceptron.csv",
+        csv_file_full_url="../resources/datasets/perceptron.csv",
         x_column_labels=['x1', 'x2'],
         y_column_labels=['y1']
     )
@@ -54,11 +54,12 @@ def main():
         num_epochs=10000,
         validation_dataloader=validation_dataloader,
         check_point_file_save_directory_path="../_check_point_files/multi_layer_perceptron",
-        # check_point_load_file_full_path="../_check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt"
+        # check_point_load_file_full_path="../_check_point_files/~/checkpoint(2024_02_29_17_51_09_330).pt",
+        log_freq=1000
     )
 
     # 모델 저장
-    model_file_save_directory_path = "../_model_files/multi_layer_perceptron"
+    model_file_save_directory_path = "../_torch_model_files/multi_layer_perceptron"
     if not os.path.exists(model_file_save_directory_path):
         os.makedirs(model_file_save_directory_path)
     save_file_full_path = tu.save_model_file(

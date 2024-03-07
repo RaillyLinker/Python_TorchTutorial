@@ -12,7 +12,7 @@ import numpy as np
 변형의 정도가 너무 크다면 데이터 품질이 저하될 수 있습니다.
 """
 
-img = Image.open("../_datasets/images/cat.jpg")
+img = Image.open("../resources/datasets/images/cat.jpg")
 
 
 # 1.
@@ -170,7 +170,7 @@ def transform7(image):
             # 이미지 혼합
             # 다중 레이블 문제에 대해 강건해집니다.
             Mixup(
-                target=Image.open("../_datasets/images/dog.jpg"),
+                target=Image.open("../resources/datasets/images/dog.jpg"),
                 scale=(512, 512),
                 alpha=0.5,
                 beta=0.5

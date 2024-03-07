@@ -160,6 +160,6 @@ cython_debug/
 #.idea/
 
 /_check_point_files/**
-/_datasets/corpus.txt
-/_model_files/**
+/resources/datasets/corpus.txt
+/_torch_model_files/**
 /_by_product_files/**

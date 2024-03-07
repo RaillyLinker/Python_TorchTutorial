@@ -19,7 +19,9 @@ corpus_test = pd.DataFrame(corpus.test)
 
 # 한국어 형태소로 분리
 tokenizer = Okt()
-tokens = [tokenizer.morphs(review) for review in corpus_train.text]
+tokens = []
+for review in corpus_train.text:
+    tokens.append(tokenizer.morphs(review))
 for review in corpus_test.text:
     tokens.append(tokenizer.morphs(review))
 
@@ -45,7 +47,7 @@ word2vec = Word2Vec(
     # 학습 에폭 수
     epochs=3,
     # 단어 사전의 최대 크기 : 최소 빈도를 충족하는 단어가 최대 최종 단어 사전보다 많으면 자주 등장한 단어 숮으로 단어 사전을 구축합니다.
-    max_final_vocab=10000
+    max_final_vocab=50000
 )
 
 # 학습된 모델을 저장

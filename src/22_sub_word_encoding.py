@@ -1,4 +1,5 @@
-import re, collections
+import collections
+import re
 
 """
 [하위 단어 토크나이징]
@@ -20,7 +21,7 @@ import re, collections
 [바이트페어 인코딩]
 바이트페어 인코딩 (Byte Pair Encoding : BPE) 란, 다이어그램 코딩(Diagram Coding) 이라고도 합니다.
 1994년에 제안된 데이터 압축 알고리즘으로 시작된 방식이지만, 지금은 이처럼 자연어 처리(NLP) 분야, 
-특히 텍스트 또는 언어 모델링에서 토큰화(tokenization) 기법으로 널리 사용되고 있습니다.
+특히 텍스트 또는 언어 모델링(GPT-3, GPT-4, etc...)에서 토큰화(tokenization) 기법으로 널리 사용되고 있습니다.
 
 이 방식의 기본 아이디어는 말뭉치(corpus) 내에서 가장 빈번하게 등장하는 바이트 쌍(혹은 문자 쌍)을 반복적으로 합치면서 새로운 단어 또는 토큰을 생성하는 것입니다.
 이렇게 함으로써, 모델이 처리해야 할 토큰의 수를 줄이고, 언어의 다양한 변형(variation)을 더 잘 핸들링할 수 있게 됩니다.
@@ -144,71 +145,157 @@ l, o, w, e, r, n, s, t, i, d, es, est, lo, low, ne, new, newest, wi, wid, widest
 
 이렇게 되네요.
 
+인코딩의 경우는
+
+위와 같은 단어사전을 기반으로, 새로 들어온 단어를 글자단위로 쪼개서 위 사전에 대입하여 서브 워드 인코딩을 하면 됩니다.
+
 자, 보다시피 글자에서 시작하여 단어가 합성되어가며 단어 사전을 만들 수 있음을 알 수 있습니다.
 
-이와 같이 하여 OOV 를 줄일 수 있습니다.
+최소 글자단위로 줄어들기 때문에, OOV 를 줄일 수 있으며, 단어 그 자체로서의 의미 역시(의미를 정확히 지정하지 않아도) 지켜질 수 있습니다.
 
 실제 구현은 아래와 같습니다.
 """
 
+
 # BPE 구현
-# 탐색 -> 치환 반복 횟수
-num_merges = 10
+class BytePairEncoder:
+    def __init__(self):
+        super().__init__()
+        # 어느 시점에 어느 pair 가 merge 된 지에 대한 history dict
+        # ex : {('e', 's'): 1, ('es', 't'): 2, ('est', '</w>'): 3, ('l', 'o'): 4, ...}
+        self.bpe_merge_history = {}
+
+        # 합쳐진 단어가 무슨 pair 로 합쳤는지에 대한 history dict
+        # ex : {'es': ('e', 's'), 'est': ('es', 't'), 'est</w>': ('est', '</w>'), ...}
+        self.bpe_merge_word_dict = {}
+
+    def bpe_train(
+            self,
+            # 단어 / 빈도 사전 (ex : {'l o w </w>': 5, ...})
+            word_count_dict
+    ):
+        # num_merges 에 설정된 횟수 만큼 탐색 -> 치환 반복
+        merge_count = 1
+        while True:
+            pairs = collections.defaultdict(int)
+            # 단어 / 빈도 사전을 순회
+            for word, freq in word_count_dict.items():
+                # 단어를 글자 단위로 쪼개기
+                symbols = word.split()
+                # 쪼개진 글자를 순회(pair 이므로 끝부분에서 -1 까지)
+                for symbol_idx in range(len(symbols) - 1):
+                    # 기준이 되는 현재 인덱스 단어와, 현재 인덱스 단어의 쌍을 입력 후 freq 더하기
+                    # {('l', 'o'): 7, ...}
+                    pairs[symbols[symbol_idx], symbols[symbol_idx + 1]] += freq
+
+            # 현 상태에서 word_count_dict 에 존재하는 pair / freq dict 가 준비된 상황
+            if pairs.__len__() == 0:
+                # 탐색이 끝남
+                break
+
+            # pairs 에서 가장 freq 가 많은 pair 를 선정
+            most_freq_pair = max(pairs, key=pairs.get)
+
+            # word_count_dict 에서 most_freq_pair 에 해당하는 글자를 제거하고, pair 를 합친 글자를 치환하기
+            v_out = {}
+            p = re.compile(r'(?<!\S)' + re.escape(' '.join(most_freq_pair)) + r'(?!\S)')
+            for word in word_count_dict:
+                w_out = p.sub(''.join(most_freq_pair), word)
+                v_out[w_out] = word_count_dict[word]
+            word_count_dict = v_out
+
+            self.bpe_merge_history[most_freq_pair] = merge_count
+            self.bpe_merge_word_dict[most_freq_pair[0] + most_freq_pair[1]] = most_freq_pair
+
+            merge_count += 1
+
+    def encode(self, origin_word):
+        # origin_word 를 글자 단위로 쪼개고, 마지막에 </w> 를 붙입니다.
+        # ex : ('l', 'o', 'k', 'i', '</w>')
+        word = tuple(origin_word) + ('</w>',)
+
+        # 글자 단위 pair 생성
+        # ex : {('i', '</w>'), ('l', 'o'), ('o', 'k'), ('k', 'i')}
+        pairs = set()
+        prev_char = word[0]
+        for char in word[1:]:
+            pairs.add((prev_char, char))
+            prev_char = char
+
+        if not pairs:
+            # pairing 을 할 수 없다면 그대로 반환
+            return origin_word
+
+        iteration = 0
+        while True:
+            # train 에서 merge 한 history 인 bpe_merge_history 를 가지고 입력된 글자를 치환하기를 반복
+            iteration += 1
+
+            # train 에서 merge 한 history 인 bpe_merge_history 를 가지고, merge 에 사용한 동일한 pair 를 탐색
+            bigram = min(pairs, key=lambda pair: self.bpe_merge_history.get(pair, float('inf')))
+            if bigram not in self.bpe_merge_history:
+                break
+            first, second = bigram
+
+            # 새 단어의 글자 리스트
+            new_word = []
+            i = 0
+            # 글자 수 -1 만큼 순회하면서 글자를 합성
+            while i < len(word):
+                try:
+                    j = word.index(first, i)
+                    new_word.extend(word[i:j])
+                    i = j
+                except:
+                    new_word.extend(word[i:])
+                    break
+
+                if word[i] == first and i < len(word) - 1 and word[i + 1] == second:
+                    new_word.append(first + second)
+                    i += 2
+                else:
+                    new_word.append(word[i])
+                    i += 1
+            new_word = tuple(new_word)
+            word = new_word
+            if len(word) == 1:
+                break
+            else:
+                pairs = set()
+                prev_char = word[0]
+                for char in word[1:]:
+                    pairs.add((prev_char, char))
+                    prev_char = char
+
+        # 특별 토큰인 </w>는 출력하지 않는다.
+        if word[-1] == '</w>':
+            word = word[:-1]
+        elif word[-1].endswith('</w>'):
+            word = word[:-1] + (word[-1].replace('</w>', ''),)
+
+        return word
+
 
 # 말뭉치에서 단어 / 빈도 사전 추출하기
-dictionary = {
-    'l o w': 5,
-    'l o w e r': 2,
-    'n e w e s t': 6,
-    'w i d e s t': 3
+word_count_dict = {
+    'l o w </w>': 5,
+    'l o w e r </w>': 2,
+    'n e w e s t </w>': 6,
+    'w i d e s t </w>': 3
 }
+bpe_obj = BytePairEncoder()
 
-# 하위 단어 사전
-sub_word_vocab = []
-bpe_codes = {}
-bpe_codes_reverse = {}
+# bpe 객체에 단어사전 학습
+bpe_obj.bpe_train(word_count_dict=word_count_dict)
 
-# 초기 단어 사전 구성
-sub_word_vocab_set = set()
-for key in dictionary.keys():
-    letters = [char for char in key if char.isalpha()]
-    sub_word_vocab_set.update(letters)
+# OOV 를 인코딩
+# ex : ('lo', 'k', 'i')
+print(bpe_obj.encode("loki"))
 
-sub_word_vocab = list(sub_word_vocab_set)
-print('초기 하위 단어 사전 :', sub_word_vocab, '\n')
+# ex : ('low', 'i', 'n', 'g')
+print(bpe_obj.encode("lowing"))
 
-for i in range(num_merges):
-    print(i + 1)
-
-    # 유니그램의 pair들의 빈도수를 카운트
-    pairs = collections.defaultdict(int)
-    for word, freq in dictionary.items():
-        symbols = word.split()
-        for i in range(len(symbols) - 1):
-            pairs[symbols[i], symbols[i + 1]] += freq
-    print('현재 pair들의 빈도수 :', dict(pairs))
-
-    pairs = pairs
-    best = max(pairs, key=pairs.get)
-    v_out = {}
-    bigram = re.escape(' '.join(best))
-    p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
-    for word in dictionary:
-        w_out = p.sub(''.join(best), word)
-        v_out[w_out] = dictionary[word]
-    dictionary = v_out
-
-    sub_word_vocab.append(''.join(best))
-
-    bpe_codes[best] = i
-    bpe_codes_reverse[best[0] + best[1]] = best
-
-    print("new merge: {}".format(best))
-    print("dictionary: {}".format(dictionary))
-    print("sub_word_vocab: {}".format(sub_word_vocab))
-    print("bpe_codes: {}".format(bpe_codes))
-    print("bpe_codes_reverse: {}".format(bpe_codes_reverse))
-    print("")
+# 위에서 보이다시피 bpe 를 사용하면 OOV 도 에러가 나지 않으며, 학습에 사용되는 문장이 많아질수록 정확도는 높아집니다.
 
 """
 [워드피스]

@@ -289,19 +289,26 @@ bpe_obj = BytePairEncoder()
 bpe_obj.bpe_train(word_count_dict=word_count_dict)
 
 # OOV 를 인코딩
+print("BPE 인코딩 결과")
 # ex : ('lo', 'k', 'i')
 print(bpe_obj.encode("loki"))
 
 # ex : ('low', 'i', 'n', 'g')
 print(bpe_obj.encode("lowing"))
+print("")
 
 # 위에서 보이다시피 bpe 를 사용하면 OOV 도 에러가 나지 않으며, 학습에 사용되는 문장이 많아질수록 정확도는 높아집니다.
 
 """
 [워드피스]
-Wordpiece 토크나이저는 바이트 페어 인코딩 토크나이저와 듀사한 방법으로 학습되지만,
-빈도 기반이 아닌 확률 기반으로 글자 쌍을 병합합니다.
+WordPiece Tokenizer 는 BPE의 변형 알고리즘입니다. 
+해당 알고리즘은 BPE가 빈도수에 기반하여 가장 많이 등장한 쌍을 병합하는 것과는 달리, 
+병합되었을 때 말뭉치의 우도(Likelihood)를 가장 높이는 쌍을 병합합니다.
+이 알고리즘은 Google이 유명 딥 러닝 모델 BERT를 훈련하기 위해서 사용되기도 하였습니다.
+
+(WPT 설명)
 
 """
 
-# todo
+
+

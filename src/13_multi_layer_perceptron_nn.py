@@ -214,6 +214,8 @@ if __name__ == '__main__':
     시그모이드 함수가 두 가지 선택지 중 하나를 고르는 이진 분류 (Binary Classification) 문제에 사용된다면 
     세 가지 이상의 (상호 배타적인) 선택지 중 하나를 고르는 다중 클래스 분류(MultiClass Classification) 문제에 주로 사용됩니다.
 
+- 은닉층에서는 ReLU나 Leaky ReLU와 같은 ReLU 함수의 변형들을 사용하세요.
+
 - 스탠포드 대학교의 딥 러닝 강의 cs231n에서는 ReLU를 먼저 시도해보고, 
     그다음으로 LeakyReLU나 ELU 같은 ReLU의 변형들을 시도해보며, 
     sigmoid는 사용하지 말라고 권장합니다.

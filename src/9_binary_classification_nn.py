@@ -40,6 +40,12 @@ def main():
     model = binary_classification.MainModel()
 
     # 모델 학습
+    # 손실 함수는 nn.BCELoss 를 사용합니다.(Binary Cross Entropy)
+    # 구현한다면,
+    # losses = -(y_train * torch.log(model_out) +
+    #            (1 - y_train) * torch.log(1 - model_out))
+    # 이렇게 합니다.
+    # model_out 은 확률값으로 0 과 1 사이의 실수입니다.
     tu.train_model(
         device=device,
         model=model,

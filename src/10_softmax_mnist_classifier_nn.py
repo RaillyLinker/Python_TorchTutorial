@@ -118,25 +118,29 @@ def main():
 
     # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
     # x : (28, 28), y : (1) 형식입니다. y 의 경우는 One Hot Encoding 없이 CrossEntropyLoss 함수에 그대로 넣어줘도 됩니다.
-    train_dataset = dsets.MNIST(root='MNIST_data/',
-                                train=True,
-                                transform=transforms.Compose(
-                                    [
-                                        transforms.ToTensor(),
-                                        lambda x: x.view(-1)  # 이미지를 1차원 벡터로 평탄화
-                                    ]
-                                ),
-                                download=True)
+    train_dataset = dsets.MNIST(
+        root='../resources/datasets/MNIST_data/',
+        train=True,
+        transform=transforms.Compose(
+            [
+                transforms.ToTensor(),
+                lambda x: x.view(-1)  # 이미지를 1차원 벡터로 평탄화
+            ]
+        ),
+        download=True
+    )
 
-    validation_dataset = dsets.MNIST(root='MNIST_data/',
-                                     train=False,
-                                     transform=transforms.Compose(
-                                         [
-                                             transforms.ToTensor(),
-                                             lambda x: x.view(-1)  # 이미지를 1차원 벡터로 평탄화
-                                         ]
-                                     ),
-                                     download=True)
+    validation_dataset = dsets.MNIST(
+        root='../resources/datasets/MNIST_data/',
+        train=False,
+        transform=transforms.Compose(
+            [
+                transforms.ToTensor(),
+                lambda x: x.view(-1)  # 이미지를 1차원 벡터로 평탄화
+            ]
+        ),
+        download=True
+    )
 
     # 데이터 로더 래핑
     train_dataloader = DataLoader(train_dataset, batch_size=100, shuffle=True, drop_last=True)

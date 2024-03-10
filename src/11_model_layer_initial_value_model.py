@@ -1,6 +1,5 @@
 import torch
 from torch import nn
-import utils.torch_util as tu
 
 """
 [모델 파라미터 초기화]

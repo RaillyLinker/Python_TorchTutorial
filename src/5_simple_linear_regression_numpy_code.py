@@ -21,9 +21,6 @@ train_y = np.array(
      [17.46], [19.8], [18], [21.34], [22], [22.5], [24.57], [26.04], [21.6], [28.8]]
 )
 
-# 입력 데이터 정규화 (평균 0, 표준 편차 1 이 되도록 수정 : 여기선 오버 플로우를 막기 위해 사용하였습니다.)
-train_x_normalized = (train_x - np.mean(train_x)) / np.std(train_x)
-
 # 선형 회귀 모델(y = (x * w) + b) 를 이루는 학습 가능한 파라미터(w, b)
 model_weight = 0.0
 model_bias = 0.0
@@ -31,11 +28,11 @@ model_bias = 0.0
 # 에포크 (학습 횟수)
 epoch_n = 10000
 # 학습률
-learning_rate = 0.005
+learning_rate = 0.001
 
 for epoch in range(epoch_n):
     # 모델 예측
-    model_out = train_x_normalized * model_weight + model_bias
+    model_out = train_x * model_weight + model_bias
 
     # 손실 계산 (MSE)
     # 아래에서는 정답값과 예측값의 차이를 구하고, 그것의 부호를 제거하기 위해 제곱을 한 값들의 평균을 구하는 Mean Square Error 를 사용했는데,
@@ -45,7 +42,7 @@ for epoch in range(epoch_n):
     model_loss = np.mean((model_out - train_y) ** 2)
 
     # 기울기 계산
-    d_weight = 2 * np.mean((model_out - train_y) * train_x_normalized)
+    d_weight = 2 * np.mean((model_out - train_y) * train_x)
     d_bias = 2 * np.mean(model_out - train_y)
 
     # 경사 하강법으로 모델 파라미터 갱신

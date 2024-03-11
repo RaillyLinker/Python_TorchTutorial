@@ -17,7 +17,7 @@ class MainModel(nn.Module):
             n_layers,
             dropout=0.5,
             bidirectional=True,
-            model_type="lstm",
+            model_type="gru",
             pretrained_embedding=None
     ):
         super().__init__()
@@ -44,6 +44,15 @@ class MainModel(nn.Module):
             )
         elif model_type == "lstm":
             self.model = nn.LSTM(
+                input_size=embedding_dim,
+                hidden_size=hidden_dim,
+                num_layers=n_layers,
+                bidirectional=bidirectional,
+                dropout=dropout,
+                batch_first=True,
+            )
+        elif model_type == "gru":
+            self.model = nn.GRU(
                 input_size=embedding_dim,
                 hidden_size=hidden_dim,
                 num_layers=n_layers,

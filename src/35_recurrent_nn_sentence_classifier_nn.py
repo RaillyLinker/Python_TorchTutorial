@@ -14,7 +14,7 @@ from torch import optim
 
 """
 [순환 신경망 모델 문장 분류기]
-RNN, LSTM 을 이용한 문장 분류기를 만들 것입니다.
+RNN, LSTM, GRU 를 이용한 문장 분류기를 만들 것입니다.
 문장을 입력 하면, 해당 문장에 포함된 감정을 분석 하여 분류 하는 모델입니다.
 """
 
@@ -104,9 +104,16 @@ def main():
         if token not in ["<pad>", "<unk>"]:
             init_embeddings[index] = word2vec.wv[token]
 
+    # 사용할 RNN 모델 (rnn, lstm, gru)
+    model_type = "gru"
+
     model = recurrent_nn_sentence_classifier.MainModel(
-        n_vocab=n_vocab, hidden_dim=hidden_dim, embedding_dim=embedding_dim,
-        n_layers=n_layers, pretrained_embedding=init_embeddings
+        n_vocab=n_vocab,
+        hidden_dim=hidden_dim,
+        embedding_dim=embedding_dim,
+        n_layers=n_layers,
+        pretrained_embedding=init_embeddings,
+        model_type=model_type
     )
 
     # 모델 학습

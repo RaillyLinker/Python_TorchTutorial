@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from gensim.models import Word2Vec
 
 """
 [파이토치(PyTorch)의 nn.Embedding()]
@@ -91,5 +92,27 @@ print(embedding_layer(torch.tensor(3)))
 - 위에서 본 것처럼 torch 에서 제공하는 Embedding 모델을 사용하면 임베딩을 모델 안에 포함시켜 내부의 임베딩 벡터를 사용할 수 있습니다.
     그런데, 임베딩 모델, 임베딩 레이어에서 중요한 것은 모델 파라미터가 아닌 임베딩 벡터의 룩업 테이블이므로,
     이미 이미 학습된 다른 모델에서 이를 가져와 사용할 수 있습니다.
-    다음 글에서 정리합니다.
 """
+# 저장된 Word2Vec 모델 불러오기
+model_file_path = "../_by_product_files/gensim_word_2_vec/word2vec.model"
+word2vec = Word2Vec.load(model_file_path)
+
+# 단어에서 인덱스로의 매핑 생성
+word_to_index = {word: idx for idx, word in enumerate(word2vec.wv.index_to_key)}
+
+# PyTorch의 nn.Embedding을 사용하여 임베딩 레이어 정의
+embedding_dim = word2vec.vector_size
+vocab_size = len(word_to_index)
+
+embedding_layer = nn.Embedding(vocab_size, embedding_dim)
+
+# 임베딩 레이어를 Word2Vec 모델의 가중치로 초기화
+embedding_layer.weight = nn.Parameter(torch.FloatTensor(word2vec.wv.vectors))
+
+# 예시: 특정 단어에 대한 임베딩 얻기
+word = '예시_단어'
+word_index = word_to_index.get(word, word_to_index["<unk>"])  # 해당 단어가 어휘에 없으면 Unknown 인덱스
+embedding = embedding_layer(torch.LongTensor([word_index]))
+
+# 예시 단어에 대한 임베딩 출력
+print(f"'{word}'에 대한 임베딩:\n{embedding}")

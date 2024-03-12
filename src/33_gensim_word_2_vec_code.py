@@ -24,7 +24,7 @@ if corpus_test.isnull().values.any():  # NULL 값 존재 유무
 
 # 한국어 형태소로 분리
 tokenizer = Okt()
-tokens = []
+tokens = [["<unk>"]]  # 단어 사전에 없을 모르는 단어는 <unk> 로 표현 하도록 이를 단어 사전에 포함 시킵니다.
 for review in corpus_train.text:
     tokens.append(tokenizer.morphs(review))
 for review in corpus_test.text:
@@ -55,8 +55,8 @@ word2vec = Word2Vec(
     sg=1,
     # 학습 에폭 수
     epochs=3,
-    # 단어 사전의 최대 크기 : 최소 빈도를 충족하는 단어가 최대 최종 단어 사전보다 많으면 자주 등장한 단어 숮으로 단어 사전을 구축합니다.
-    max_final_vocab=50000
+    # 단어 사전의 최대 크기 : 최소 빈도를 충족하는 단어가 최대 최종 단어 사전보다 많으면 자주 등장한 단어 순으로 단어 사전을 구축합니다.
+    # max_final_vocab=50000
 )
 
 # 학습된 모델을 저장

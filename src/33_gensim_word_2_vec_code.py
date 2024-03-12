@@ -15,7 +15,12 @@ corpus = Korpora.load("nsmc")
 
 # 학습 데이터 프레임 추리기
 corpus_train = pd.DataFrame(corpus.train)
+if corpus_train.isnull().values.any():  # NULL 값 존재 유무
+    corpus_train = corpus_train.dropna(how='any')  # 결측값이 존재하는 행을 제거
+
 corpus_test = pd.DataFrame(corpus.test)
+if corpus_test.isnull().values.any():  # NULL 값 존재 유무
+    corpus_test = corpus_test.dropna(how='any')  # 결측값이 존재하는 행을 제거
 
 # 한국어 형태소로 분리
 tokenizer = Okt()
@@ -24,6 +29,8 @@ for review in corpus_train.text:
     tokens.append(tokenizer.morphs(review))
 for review in corpus_test.text:
     tokens.append(tokenizer.morphs(review))
+
+print("tokens len :", len(tokens))  # 개수 출력
 
 # 형태소 분리된 문장 리스트 3개 출력 :
 # [
@@ -42,6 +49,8 @@ word2vec = Word2Vec(
     window=5,
     # 학습에 사용될 단어의 최소 빈도로, 이 값의 미만으로 나오는 단어는 학습에 사용하지 않습니다.
     min_count=1,
+    # 학습시 사용할 스레드 개수
+    workers=4,
     # Skip-gram 모델 사용 여부 (0 : CBoW 사용, 1 : Skip-Gram 사용)
     sg=1,
     # 학습 에폭 수
@@ -67,3 +76,7 @@ print(word2vec.wv[word])
 print(word2vec.wv.most_similar(word, topn=5))
 # 두 단어간 유사도 확인
 print(word2vec.wv.similarity(w1=word, w2="연기력"))
+
+# OOV 테스트 (에러가 발생합니다.)
+# KeyError: "Key '쀍궭휍' not present"
+print(word2vec.wv["쀍궭휍"])

@@ -4,19 +4,31 @@ import torch
 
 class MainModel(nn.Module):
     """
-    description : 선형 회귀 모델
+    description :
     input_shape :
     output_shape : [[y1], [y1], ...]
     """
 
-    def __init__(self, pretrained_embedding, max_length, dropout=0.5):
+    def __init__(
+            self,
+            n_vocab,
+            max_length,
+            pretrained_embedding_layer=None
+    ):
         super().__init__()
-        # 모델 내 레이어
-        self.embedding = nn.Embedding.from_pretrained(
-            torch.tensor(pretrained_embedding, dtype=torch.float32)
-        )
-        embedding_dim = self.embedding.weight.shape[1]
+        embedding_dim = 128
 
+        # 모델 내 레이어
+        if pretrained_embedding_layer is not None:
+            self.embedding = pretrained_embedding_layer
+        else:
+            self.embedding = nn.Embedding(
+                num_embeddings=n_vocab,
+                embedding_dim=embedding_dim,
+                padding_idx=0
+            )
+
+        # 모델 내 레이어
         filter_sizes = [3, 3, 4, 4, 5, 5]
         conv = []
         for size in filter_sizes:
@@ -35,7 +47,7 @@ class MainModel(nn.Module):
 
         output_size = len(filter_sizes)
         self.pre_classifier = nn.Linear(output_size, output_size)
-        self.dropout = nn.Dropout(dropout)
+        self.dropout = nn.Dropout(0.5)
         self.classifier = nn.Linear(output_size, 1)
 
     def _init_weights(self):

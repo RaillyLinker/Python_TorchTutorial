@@ -68,6 +68,14 @@ def main():
         print(vocab[:10])
         print(len(vocab))
 
+        unk_id = token_to_id["<unk>"]
+        train_ids = [
+            [token_to_id.get(token, unk_id) for token in review] for review in train_tokens
+        ]
+        test_ids = [
+            [token_to_id.get(token, unk_id) for token in review] for review in test_tokens
+        ]
+
         def pad_sequences(sequences, max_length, pad_value):
             result = list()
             for sequence in sequences:
@@ -76,14 +84,6 @@ def main():
                 padded_sequence = sequence + [pad_value] * pad_length
                 result.append(padded_sequence)
             return np.asarray(result)
-
-        unk_id = token_to_id["<unk>"]
-        train_ids = [
-            [token_to_id.get(token, unk_id) for token in review] for review in train_tokens
-        ]
-        test_ids = [
-            [token_to_id.get(token, unk_id) for token in review] for review in test_tokens
-        ]
 
         max_length = 32
         pad_id = token_to_id["<pad>"]
@@ -134,6 +134,20 @@ def main():
         test_ids = [
             [word2vec.wv.key_to_index.get(token, unk_id) for token in review] for review in test_tokens
         ]
+
+        def pad_sequences(sequences, max_length, pad_value):
+            result = list()
+            for sequence in sequences:
+                sequence = sequence[:max_length]
+                pad_length = max_length - len(sequence)
+                padded_sequence = sequence + [pad_value] * pad_length
+                result.append(padded_sequence)
+            return np.asarray(result)
+
+        max_length = 32
+        pad_id = word2vec.wv.key_to_index["<pad>"]
+        train_ids = pad_sequences(train_ids, max_length, pad_id)
+        test_ids = pad_sequences(test_ids, max_length, pad_id)
 
         print(train_ids[0])
         print(test_ids[0])

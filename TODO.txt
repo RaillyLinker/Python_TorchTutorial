@@ -24,3 +24,9 @@
     34(글로브(Global Vectors for Word Representation, GloVe)),
     40(ELMo),
     43(Embedding Layer 부분을 41 에 참고하여 수정)
+
+    41 에러 해결
+      File "C:\Dev\Python\Python_TorchTutorial\src\41_recurrent_nn_sentence_classifier_nn.py", line 142, in main
+    torch.tensor(train_ids),
+    ^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: expected sequence of length 6 at dim 1 (got 13)

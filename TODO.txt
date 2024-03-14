@@ -17,4 +17,10 @@
 
 - 튜토리얼 작성이 끝나면 쓸만한 기술들을 추려서 개발 템플릿 만들기
 
-- 미완성 : 4(통계 관련), 25(워드피스), 32(네거티브 샘플링), 34(글로브(Global Vectors for Word Representation, GloVe))
+- 미완성 :
+    4(통계 관련),
+    25(워드피스),
+    32(네거티브 샘플링),
+    34(글로브(Global Vectors for Word Representation, GloVe)),
+    40(ELMo),
+    43(Embedding Layer 부분을 41 에 참고하여 수정)

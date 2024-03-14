@@ -12,20 +12,19 @@ class MainModel(nn.Module):
     def __init__(
             self,
             n_vocab,
-            hidden_dim,
-            embedding_dim,
-            n_layers,
-            dropout=0.5,
-            bidirectional=True,
-            model_type="gru",
-            pretrained_embedding=None
+            rnn_layer_hidden_dim,
+            rnn_layer_numbers,
+            rnn_layer_dropout=0.5,
+            rnn_layer_bidirectional=True,
+            rnn_layer_model_type="gru",
+            pretrained_embedding_layer=None
     ):
         super().__init__()
+        embedding_dim = 128
+
         # 모델 내 레이어
-        if pretrained_embedding is not None:
-            self.embedding = nn.Embedding.from_pretrained(
-                torch.tensor(pretrained_embedding, dtype=torch.float32)
-            )
+        if pretrained_embedding_layer is not None:
+            self.embedding = pretrained_embedding_layer
         else:
             self.embedding = nn.Embedding(
                 num_embeddings=n_vocab,
@@ -33,39 +32,39 @@ class MainModel(nn.Module):
                 padding_idx=0
             )
 
-        if model_type == "rnn":
+        if rnn_layer_model_type == "rnn":
             self.model = nn.RNN(
                 input_size=embedding_dim,
-                hidden_size=hidden_dim,
-                num_layers=n_layers,
-                bidirectional=bidirectional,
-                dropout=dropout,
+                hidden_size=rnn_layer_hidden_dim,
+                num_layers=rnn_layer_numbers,
+                bidirectional=rnn_layer_bidirectional,
+                dropout=rnn_layer_dropout,
                 batch_first=True,
             )
-        elif model_type == "lstm":
+        elif rnn_layer_model_type == "lstm":
             self.model = nn.LSTM(
                 input_size=embedding_dim,
-                hidden_size=hidden_dim,
-                num_layers=n_layers,
-                bidirectional=bidirectional,
-                dropout=dropout,
+                hidden_size=rnn_layer_hidden_dim,
+                num_layers=rnn_layer_numbers,
+                bidirectional=rnn_layer_bidirectional,
+                dropout=rnn_layer_dropout,
                 batch_first=True,
             )
-        elif model_type == "gru":
+        elif rnn_layer_model_type == "gru":
             self.model = nn.GRU(
                 input_size=embedding_dim,
-                hidden_size=hidden_dim,
-                num_layers=n_layers,
-                bidirectional=bidirectional,
-                dropout=dropout,
+                hidden_size=rnn_layer_hidden_dim,
+                num_layers=rnn_layer_numbers,
+                bidirectional=rnn_layer_bidirectional,
+                dropout=rnn_layer_dropout,
                 batch_first=True,
             )
 
-        if bidirectional:
-            self.classifier = nn.Linear(hidden_dim * 2, 1)
+        if rnn_layer_bidirectional:
+            self.classifier = nn.Linear(rnn_layer_hidden_dim * 2, 1)
         else:
-            self.classifier = nn.Linear(hidden_dim, 1)
-        self.dropout = nn.Dropout(dropout)
+            self.classifier = nn.Linear(rnn_layer_hidden_dim, 1)
+        self.dropout = nn.Dropout(rnn_layer_dropout)
 
         self._init_weights()
 

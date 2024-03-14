@@ -23,97 +23,146 @@ def main():
     # 사용 가능 디바이스
     device = tu.get_gpu_support_device(gpu_support=True)
 
-    # 데이터셋 객체 생성 (ex : tensor([[-10., 100., 82.], ...], device = cpu), tensor([[327.7900], ...], device = cpu))
+    # 학습할 네이버 영화 리뷰 데이터셋 말뭉치 로딩
     corpus = Korpora.load("nsmc")
-    corpus_df = pd.DataFrame(corpus.test)
 
-    train = corpus_df.sample(frac=0.9, random_state=42)
-    test = corpus_df.drop(train.index)
+    # 학습 데이터 프레임 추리기
+    corpus_train = pd.DataFrame(corpus.train)
+    if corpus_train.isnull().values.any():  # NULL 값 존재 유무
+        corpus_train = corpus_train.dropna(how='any')  # 결측값이 존재하는 행을 제거
 
-    print(train.head(5).to_markdown())
-    print("Training Data Size :", len(train))
-    print("Testing Data Size :", len(test))
+    corpus_test = pd.DataFrame(corpus.test)
+    if corpus_test.isnull().values.any():  # NULL 값 존재 유무
+        corpus_test = corpus_test.dropna(how='any')  # 결측값이 존재하는 행을 제거
 
-    def build_vocab(corpus, n_vocab, special_tokens):
-        counter = Counter()
-        for tokens in corpus:
-            counter.update(tokens)
-        vocab = special_tokens
-        for token, count in counter.most_common(n_vocab):
-            vocab.append(token)
-        return vocab
+    print(corpus_train.head(5).to_markdown())
+    print("Training Data Size :", len(corpus_train))
+    print("Testing Data Size :", len(corpus_test))
 
+    # 토크나이징
     tokenizer = Okt()
-    train_tokens = [tokenizer.morphs(review) for review in train.text]
-    test_tokens = [tokenizer.morphs(review) for review in test.text]
+    train_tokens = [tokenizer.morphs(review) for review in corpus_train.text]
+    test_tokens = [tokenizer.morphs(review) for review in corpus_test.text]
 
-    vocab = build_vocab(corpus=train_tokens, n_vocab=5000, special_tokens=["<pad>", "<unk>"])
-    token_to_id = {token: idx for idx, token in enumerate(vocab)}
-    id_to_token = {idx: token for idx, token in enumerate(vocab)}
+    # ex : [['아', '더빙', '..', '진짜', '짜증나네요', '목소리'], ['흠', '...', '오버', '연기', '조차', '가볍지', '않구나'], ...]
+    print(train_tokens[:5])
 
-    print(vocab[:10])
-    print(len(vocab))
-
-    def pad_sequences(sequences, max_length, pad_value):
-        result = list()
-        for sequence in sequences:
-            sequence = sequence[:max_length]
-            pad_length = max_length - len(sequence)
-            padded_sequence = sequence + [pad_value] * pad_length
-            result.append(padded_sequence)
-        return np.asarray(result)
-
-    unk_id = token_to_id["<unk>"]
-    train_ids = [
-        [token_to_id.get(token, unk_id) for token in review] for review in train_tokens
-    ]
-    test_ids = [
-        [token_to_id.get(token, unk_id) for token in review] for review in test_tokens
-    ]
-
-    max_length = 32
-    pad_id = token_to_id["<pad>"]
-    train_ids = pad_sequences(train_ids, max_length, pad_id)
-    test_ids = pad_sequences(test_ids, max_length, pad_id)
-
-    print(train_ids[0])
-    print(test_ids[0])
-
-    train_ids = torch.tensor(train_ids)
-    test_ids = torch.tensor(test_ids)
-
-    train_labels = torch.tensor(train.label.values, dtype=torch.float32).unsqueeze(1)
-    test_labels = torch.tensor(test.label.values, dtype=torch.float32).unsqueeze(1)
-
-    train_dataset = TensorDataset(train_ids, train_labels)
-    test_dataset = TensorDataset(test_ids, test_labels)
-
-    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    validation_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
-
-    # 모델 생성
-    n_vocab = len(token_to_id)
-    hidden_dim = 64
-    embedding_dim = 128
-    n_layers = 2
-
+    # 사전 학습된 word2vec
+    # word2vec = None
     word2vec = Word2Vec.load("../_by_product_files/gensim_word_2_vec/word2vec.model")
-    init_embeddings = np.zeros((n_vocab, embedding_dim))
 
-    for index, token in id_to_token.items():
-        if token not in ["<pad>", "<unk>"]:
+    if word2vec is None:
+        # 사전 학습 모델 적용 안함
+        def build_vocab(corpus, n_vocab, special_tokens):
+            counter = Counter()
+            for tokens in corpus:
+                counter.update(tokens)
+            vocab = special_tokens
+            for token, count in counter.most_common(n_vocab):
+                vocab.append(token)
+            return vocab
+
+        vocab = build_vocab(corpus=train_tokens, n_vocab=5000, special_tokens=["<pad>", "<unk>"])
+        token_to_id = {token: idx for idx, token in enumerate(vocab)}
+
+        print(vocab[:10])
+        print(len(vocab))
+
+        def pad_sequences(sequences, max_length, pad_value):
+            result = list()
+            for sequence in sequences:
+                sequence = sequence[:max_length]
+                pad_length = max_length - len(sequence)
+                padded_sequence = sequence + [pad_value] * pad_length
+                result.append(padded_sequence)
+            return np.asarray(result)
+
+        unk_id = token_to_id["<unk>"]
+        train_ids = [
+            [token_to_id.get(token, unk_id) for token in review] for review in train_tokens
+        ]
+        test_ids = [
+            [token_to_id.get(token, unk_id) for token in review] for review in test_tokens
+        ]
+
+        max_length = 32
+        pad_id = token_to_id["<pad>"]
+        train_ids = pad_sequences(train_ids, max_length, pad_id)
+        test_ids = pad_sequences(test_ids, max_length, pad_id)
+
+        print(train_ids[0])
+        print(test_ids[0])
+
+        train_dataset = TensorDataset(
+            torch.tensor(train_ids),
+            torch.tensor(
+                corpus_train.label.values,
+                dtype=torch.float32
+            ).unsqueeze(1)
+        )
+        train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+
+        test_dataset = TensorDataset(
+            torch.tensor(test_ids),
+            torch.tensor(
+                corpus_test.label.values,
+                dtype=torch.float32
+            ).unsqueeze(1)
+        )
+        validation_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+
+        embedding_layer = None
+        vocab_size = len(token_to_id)
+    else:
+        # 사전 학습 모델 적용
+        embedding_dim = word2vec.vector_size
+        id_to_token = word2vec.wv.index_to_key
+        vocab_size = len(id_to_token)
+        init_embeddings = np.zeros((vocab_size, embedding_dim))
+
+        for index, token in enumerate(id_to_token):
             init_embeddings[index] = word2vec.wv[token]
 
-    # 사용할 RNN 모델 (rnn, lstm, gru)
-    model_type = "gru"
+        embedding_layer = nn.Embedding.from_pretrained(
+            torch.tensor(init_embeddings, dtype=torch.float32)
+        )
 
+        unk_id = word2vec.wv.key_to_index["<unk>"]
+        train_ids = [
+            [word2vec.wv.key_to_index.get(token, unk_id) for token in review] for review in train_tokens
+        ]
+        test_ids = [
+            [word2vec.wv.key_to_index.get(token, unk_id) for token in review] for review in test_tokens
+        ]
+
+        print(train_ids[0])
+        print(test_ids[0])
+
+        train_dataset = TensorDataset(
+            torch.tensor(train_ids),
+            torch.tensor(
+                corpus_train.label.values,
+                dtype=torch.float32
+            ).unsqueeze(1)
+        )
+        train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+
+        test_dataset = TensorDataset(
+            torch.tensor(test_ids),
+            torch.tensor(
+                corpus_test.label.values,
+                dtype=torch.float32
+            ).unsqueeze(1)
+        )
+        validation_dataloader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+
+    # 준비된 데이터와 임베딩 레이어로 모델 생성
     model = recurrent_nn_sentence_classifier.MainModel(
-        n_vocab=n_vocab,
-        hidden_dim=hidden_dim,
-        embedding_dim=embedding_dim,
-        n_layers=n_layers,
-        pretrained_embedding=init_embeddings,
-        model_type=model_type
+        n_vocab=vocab_size,
+        rnn_layer_hidden_dim=64,
+        rnn_layer_numbers=2,
+        pretrained_embedding_layer=embedding_layer,
+        rnn_layer_model_type="gru"  # 사용할 RNN 모델 (rnn, lstm, gru)
     )
 
     # 모델 학습

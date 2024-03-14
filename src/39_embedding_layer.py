@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from gensim.models import Word2Vec
+import numpy as np
 
 """
 [파이토치(PyTorch)의 nn.Embedding()]
@@ -93,7 +94,7 @@ print(embedding_layer(torch.tensor(3)))
     그런데, 임베딩 모델, 임베딩 레이어에서 중요한 것은 모델 파라미터가 아닌 임베딩 벡터의 룩업 테이블이므로,
     이미 이미 학습된 다른 모델에서 이를 가져와 사용할 수 있습니다.
 """
-# 저장된 Word2Vec 모델 불러오기
+# (저장된 Word2Vec 모델 불러오기)
 model_file_path = "../_by_product_files/gensim_word_2_vec/word2vec.model"
 word2vec = Word2Vec.load(model_file_path)
 
@@ -108,6 +109,29 @@ embedding_layer = nn.Embedding(vocab_size, embedding_dim)
 
 # 임베딩 레이어를 Word2Vec 모델의 가중치로 초기화
 embedding_layer.weight = nn.Parameter(torch.FloatTensor(word2vec.wv.vectors))
+
+# 예시: 특정 단어에 대한 임베딩 얻기
+word = '예시_단어'
+word_index = word_to_index.get(word, word_to_index["<unk>"])  # 해당 단어가 어휘에 없으면 Unknown 인덱스
+embedding = embedding_layer(torch.LongTensor([word_index]))
+
+# 예시 단어에 대한 임베딩 출력
+print(f"'{word}'에 대한 임베딩:\n{embedding}")
+
+# ----------------------------------------------------------------------------------------------------------------------
+# (저장된 Word2Vec 모델 불러오기 2)
+word2vec = Word2Vec.load("../_by_product_files/gensim_word_2_vec/word2vec.model")
+embedding_dim = word2vec.vector_size
+id_to_token = word2vec.wv.index_to_key
+vocab_size = len(id_to_token)
+init_embeddings = np.zeros((vocab_size, embedding_dim))
+
+for index, token in enumerate(id_to_token):
+    init_embeddings[index] = word2vec.wv[token]
+
+embedding_layer = nn.Embedding.from_pretrained(
+    torch.tensor(init_embeddings, dtype=torch.float32)
+)
 
 # 예시: 특정 단어에 대한 임베딩 얻기
 word = '예시_단어'

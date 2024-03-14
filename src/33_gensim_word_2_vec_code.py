@@ -24,7 +24,12 @@ if corpus_test.isnull().values.any():  # NULL 값 존재 유무
 
 # 한국어 형태소로 분리
 tokenizer = Okt()
-tokens = [["<unk>"]]  # 단어 사전에 없을 모르는 단어는 <unk> 로 표현 하도록 이를 단어 사전에 포함 시킵니다.
+tokens = [
+    # 단어 사전에 없을 모르는 단어는 <unk> 로 표현 하도록 이를 단어 사전에 포함 시킵니다.
+    ["<unk>"],
+    # 아무 의미 없이 형태를 맞추기 위한 패딩 토큰
+    ["<pad>"]
+]
 for review in corpus_train.text:
     tokens.append(tokenizer.morphs(review))
 for review in corpus_test.text:
@@ -77,6 +82,13 @@ print(word2vec.wv.most_similar(word, topn=5))
 # 두 단어간 유사도 확인
 print(word2vec.wv.similarity(w1=word, w2="연기력"))
 
-# OOV 테스트 (에러가 발생합니다.)
+# OOV 테스트 (OOV 를 그냥 넣는다면 에러가 발생합니다.)
 # KeyError: "Key '쀍궭휍' not present"
-print(word2vec.wv["쀍궭휍"])
+word_to_check = "쀍궭휍"
+if word_to_check in word2vec.wv:
+    embedding_vector = word2vec.wv[word_to_check]
+else:
+    embedding_vector = word2vec.wv["<unk>"]
+    print(f"The word '{word_to_check}' is not present in the vocabulary. Using '<unk>' instead.")
+
+print(embedding_vector)
